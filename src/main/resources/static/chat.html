@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>AI Chat Hub</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+          rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <link rel="stylesheet" href="chat.css">
+</head>
+<body>
+
+<!-- Ambient background -->
+<div class="aurora" aria-hidden="true">
+    <span class="a1"></span>
+    <span class="a2"></span>
+    <span class="a3"></span>
+</div>
+
+<!-- ============================================================
+     SIGN IN
+     ============================================================ -->
+<section class="auth" id="authScreen">
+    <div class="auth-card">
+        <div class="auth-mark">
+            <div class="logo logo-lg"><i class="fa-solid fa-bolt"></i></div>
+            <div>
+                <div class="brand-name">AI Chat Hub</div>
+                <div class="brand-tag">Real-time messaging</div>
+            </div>
+        </div>
+
+        <h1>Sign in</h1>
+        <p class="auth-sub">Use the account you registered through the API.</p>
+
+        <div class="field">
+            <label for="loginEmail">Email</label>
+            <input id="loginEmail" type="email" autocomplete="username" placeholder="you@example.com">
+        </div>
+
+        <div class="field">
+            <label for="loginPassword">Password</label>
+            <input id="loginPassword" type="password" autocomplete="current-password" placeholder="••••••••">
+        </div>
+
+        <button class="btn-primary" id="loginBtn">
+            <i class="fa-solid fa-arrow-right-to-bracket"></i>&nbsp; Sign in
+        </button>
+
+        <div class="msg-error" id="authError" hidden></div>
+
+        <p class="auth-alt">
+            Already have a token?
+            <button class="link-btn" id="tokenToggle">Paste it instead</button>
+        </p>
+
+        <!-- manual token fallback, hidden by default -->
+        <div id="tokenBlock" hidden>
+            <div class="field" style="margin-top:14px">
+                <label for="manualToken">JWT token</label>
+                <input id="manualToken" type="text" placeholder="eyJhbGciOi...">
+            </div>
+            <div class="field">
+                <label for="manualEmail">Your email</label>
+                <input id="manualEmail" type="email" placeholder="you@example.com">
+            </div>
+            <button class="btn-primary" id="tokenLoginBtn">Connect with token</button>
+        </div>
+
+        <p class="auth-note">
+            <i class="fa-solid fa-circle-info"></i>
+            Register a user first with <code>POST /api/users/register</code>. Sign-in calls your
+            existing <code>/api/users/login</code> endpoint.
+        </p>
+    </div>
+</section>
+
+<!-- ============================================================
+     APP
+     ============================================================ -->
+<div class="app" id="app" hidden>
+
+    <div class="scrim" id="scrim" hidden></div>
+
+    <!-- ---------- SIDEBAR ---------- -->
+    <aside class="panel sidebar" id="sidebar">
+
+        <header class="sidebar-head">
+            <div class="logo"><i class="fa-solid fa-bolt"></i></div>
+            <div>
+                <div class="brand-name">AI Chat Hub</div>
+                <div class="brand-tag">Real-time messaging</div>
+            </div>
+            <button class="icon-btn close-drawer" id="closeDrawer" aria-label="Close menu">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </header>
+
+        <!-- signed-in user -->
+        <div class="me-card" id="meCard">
+            <div class="avatar" id="meAvatar">
+                <span>?</span>
+                <span class="status on"></span>
+            </div>
+            <div class="meta">
+                <div class="me-name" id="meName">—</div>
+                <span class="conn-state">
+                    <span class="conn-dot"></span>
+                    <span id="connText">Connecting</span>
+                </span>
+            </div>
+            <button class="icon-btn" id="signOutBtn" aria-label="Sign out" title="Sign out">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </button>
+        </div>
+
+        <!-- search -->
+        <div class="search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input id="searchInput" type="search" placeholder="Search conversations">
+        </div>
+
+        <div class="list-label">
+            <span>Conversations</span>
+            <button id="newChatBtn"><i class="fa-solid fa-plus"></i> New</button>
+        </div>
+
+        <div class="chat-list" id="chatList"></div>
+    </aside>
+
+    <!-- ---------- CHAT ---------- -->
+    <main class="panel chat">
+
+        <header class="chat-head">
+            <button class="icon-btn open-drawer" id="openDrawer" aria-label="Open menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+
+            <div class="avatar avatar-sm" id="peerAvatar">
+                <span>—</span>
+                <span class="status"></span>
+            </div>
+
+            <div class="meta">
+                <div class="name" id="peerName">No conversation selected</div>
+                <div class="sub" id="peerSub">Pick someone from the list</div>
+            </div>
+
+            <div class="head-actions">
+                <button class="icon-btn optional" title="Voice call" aria-label="Voice call">
+                    <i class="fa-solid fa-phone"></i>
+                </button>
+                <button class="icon-btn optional" title="Video call" aria-label="Video call">
+                    <i class="fa-solid fa-video"></i>
+                </button>
+                <button class="icon-btn" id="clearChatBtn" title="Clear this conversation"
+                        aria-label="Clear conversation">
+                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- messages -->
+        <div class="stream" id="stream">
+            <div class="stream-empty" id="streamEmpty">
+                <div class="logo logo-lg"><i class="fa-solid fa-comments"></i></div>
+                <h2>Start a conversation</h2>
+                <p>Add someone by their registered email, then send a message. It arrives on their
+                    screen the moment you hit send.</p>
+            </div>
+        </div>
+
+        <!-- real-time "peer is typing" indicator (WebSocket) -->
+        <div class="typing" id="peerTyping" hidden aria-live="polite">
+            <i></i><i></i><i></i>
+        </div>
+
+        <!-- AI "thinking" indicator (smart-reply generation) — separate element,
+             separate state, never toggled by the same code path as peerTyping -->
+        <div class="typing" id="aiTyping" hidden aria-live="polite">
+            <i></i><i></i><i></i>
+        </div>
+
+        <!-- composer -->
+        <div class="composer-wrap">
+
+            <!-- AI smart replies -->
+            <div class="ai-strip" id="aiStrip" hidden>
+                <span class="ai-label">
+                    <i class="fa-solid fa-wand-magic-sparkles spark"></i> Smart reply
+                </span>
+                <div id="chipRow" style="display:flex;gap:8px"></div>
+            </div>
+
+            <!-- emoji tray -->
+            <div class="emoji-tray" id="emojiTray" hidden></div>
+
+            <div class="composer">
+                <textarea id="input" rows="1" placeholder="Write a message…"
+                          aria-label="Message"></textarea>
+
+                <div class="composer-tools">
+                    <button class="tool" id="emojiBtn" title="Emoji" aria-label="Emoji">
+                        <i class="fa-regular fa-face-smile"></i>
+                    </button>
+                    <button class="tool" id="attachBtn" title="Attach file" aria-label="Attach file">
+                        <i class="fa-solid fa-paperclip"></i>
+                    </button>
+                    <button class="tool ai" id="aiBtn" title="Suggest replies"
+                            aria-label="Suggest replies">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </button>
+                </div>
+
+                <button class="send" id="sendBtn" aria-label="Send message">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- ---------- new conversation modal ---------- -->
+<div class="modal" id="newChatModal" hidden>
+    <div class="modal-card">
+        <h3>New conversation</h3>
+        <p>Pick a registered user, or enter their email directly.</p>
+
+        <div class="list-label" style="padding:0 0 8px">
+            <span>Registered users</span>
+        </div>
+        <div class="contacts-list" id="contactsList">
+            <div class="empty-hint" style="padding:16px">Loading…</div>
+        </div>
+
+        <div class="field" style="margin-top:14px">
+            <label for="newChatEmail">Or enter email</label>
+            <input id="newChatEmail" type="email" placeholder="friend@example.com">
+        </div>
+        <div class="msg-error" id="newChatError" hidden></div>
+        <div class="modal-actions">
+            <button class="btn-ghost" id="newChatCancel">Cancel</button>
+            <button class="btn-primary" id="newChatConfirm">Add</button>
+        </div>
+    </div>
+</div>
+
+
+<div class="toast-area" id="toastArea"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+<script src="chat.js"></script>
+</body>
+</html>
