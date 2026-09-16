@@ -1,5 +1,6 @@
 package com.mansha.chatapp.service;
 
+import com.mansha.chatapp.dto.UpdateProfileRequest;
 import com.mansha.chatapp.entity.User;
 import com.mansha.chatapp.repository.UserRepository;
 import com.mansha.chatapp.security.JwtService;
@@ -42,6 +43,37 @@ public class UserService {
         // A 401 (rather than 200 with an error string) lets the frontend
         // tell "wrong credentials" apart from "signed in, unexpected body".
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid email or password");
+    }
+
+    public User getByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+    }
+
+    /**
+     * Backs the Profile/Settings "edit profile" forms. Name and password
+     * are independently optional — send only what changed. Changing the
+     * password requires the correct current one, checked the same way a
+     * login would (legacy plain-text accounts included).
+     */
+    public User updateProfile(String email, UpdateProfileRequest request) {
+        User user = getByEmail(email);
+
+        if (request.getName() != null && !request.getName().isBlank()) {
+            user.setName(request.getName().trim());
+        }
+
+        if (request.getNewPassword() != null && !request.getNewPassword().isBlank()) {
+            if (request.getCurrentPassword() == null || !passwordMatches(user, request.getCurrentPassword())) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Current password is incorrect.");
+            }
+            if (request.getNewPassword().length() < 6) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "New password must be at least 6 characters.");
+            }
+            user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        }
+
+        return userRepository.save(user);
     }
 
     /**

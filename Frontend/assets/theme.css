@@ -59,7 +59,9 @@
     --r-pill: 999px;
 
     --ease: cubic-bezier(0.22, 1, 0.36, 1);
-    --topbar-h: 68px;
+    --sidebar-w: 240px;
+    --sidebar-w-collapsed: 78px;
+    --mobile-topbar-h: 60px;
 }
 
 /* ---------- 2. Reset ---------- */
@@ -370,71 +372,175 @@ body::before {
     .auth-panel { border-left: 0; padding: 32px 20px; }
 }
 
-/* ---------- 7. App shell (topbar + nav) ----------
-   The topbar lives in a separate #shell div (injected by App.initShell),
-   a sibling of the page's own .shell wrapper — so it's fixed rather than
-   sticky (sticky would be constrained to #shell's own near-zero-height
-   box and scroll away with it) and .shell reserves the matching space
-   with padding-top instead. */
-.shell { position: relative; z-index: 1; min-height: 100vh; padding-top: var(--topbar-h); display: flex; flex-direction: column; }
-
-.topbar {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 40;
-    display: flex; align-items: center; gap: 18px;
-    height: var(--topbar-h);
-    padding: 0 22px;
-    background: rgba(255,255,255,.86);
-    backdrop-filter: blur(14px);
-    border-bottom: 1px solid var(--stroke);
-    flex: none;
+/* ---------- 7. App shell (sidebar nav) ----------
+   The sidebar (and, on mobile, a slim top bar) live in a separate #shell
+   div injected by App.initShell, a sibling of the page's own .shell
+   wrapper. The sidebar is fixed to the viewport; .shell reserves the
+   matching horizontal space with margin-left (padding-top + a mobile
+   top bar instead, under the mobile breakpoint). */
+.shell {
+    position: relative; z-index: 1; min-height: 100vh;
+    margin-left: var(--sidebar-w);
+    display: flex; flex-direction: column;
+    transition: margin-left .25s var(--ease);
 }
-.topbar-brand { display: flex; align-items: center; gap: 11px; text-decoration: none; }
-.topbar-nav { display: flex; align-items: center; gap: 4px; margin-left: 8px; }
-.topbar-nav a {
-    display: flex; align-items: center; gap: 8px;
-    padding: 9px 15px;
-    border-radius: var(--r-pill);
+:root.sidebar-collapsed .shell { margin-left: var(--sidebar-w-collapsed); }
+
+.app-sidebar {
+    position: fixed; top: 0; left: 0; bottom: 0; z-index: 40;
+    width: var(--sidebar-w);
+    display: flex; flex-direction: column;
+    background: rgba(255,255,255,.92);
+    backdrop-filter: blur(14px);
+    border-right: 1px solid var(--stroke);
+    transition: width .25s var(--ease);
+}
+:root.sidebar-collapsed .app-sidebar { width: var(--sidebar-w-collapsed); }
+
+.sidebar-brand {
+    display: flex; align-items: center; gap: 11px;
+    padding: 20px 18px;
+    text-decoration: none;
+    flex: none;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.sidebar-nav {
+    flex: 1; min-height: 0; overflow-y: auto;
+    display: flex; flex-direction: column; gap: 2px;
+    padding: 6px 12px;
+}
+.sidebar-nav a, .sidebar-logout {
+    position: relative;
+    display: flex; align-items: center; gap: 13px;
+    padding: 11px 13px;
+    margin: 1px 0;
+    border-radius: var(--r-md);
     font-weight: 600; font-size: 14px;
     color: var(--ink-dim);
     text-decoration: none;
-    transition: background .15s var(--ease), color .15s var(--ease);
+    white-space: nowrap; overflow: hidden;
+    transition: background .15s var(--ease), color .15s var(--ease), transform .15s var(--ease);
 }
-.topbar-nav a:hover { background: var(--surface-3); color: var(--ink); }
-.topbar-nav a.active { background: var(--yellow-50); color: var(--yellow-700); }
-.topbar-nav a .badge-dot {
+.sidebar-nav a i, .sidebar-logout i {
+    width: 19px; text-align: center; flex: none; font-size: 15.5px;
+    transition: color .15s var(--ease);
+}
+.sidebar-nav a:hover, .sidebar-logout:hover { background: var(--surface-3); color: var(--ink); transform: translateX(2px); }
+.sidebar-nav a.active {
+    background: var(--yellow-50);
+    color: var(--yellow-ink);
+    font-weight: 700;
+}
+.sidebar-nav a.active i { color: var(--yellow-700); }
+.sidebar-nav a.active::before {
+    content: "";
+    position: absolute; left: -12px; top: 50%; transform: translateY(-50%);
+    width: 4px; height: 20px;
+    border-radius: var(--r-pill);
+    background: var(--grad-brand);
+}
+.sidebar-nav a .label { overflow: hidden; text-overflow: ellipsis; }
+.sidebar-nav a .badge-dot {
+    margin-left: auto;
     display: inline-flex; align-items: center; justify-content: center;
-    min-width: 17px; height: 17px; padding: 0 4px;
+    min-width: 18px; height: 18px; padding: 0 5px;
     border-radius: var(--r-pill);
     background: var(--yellow-500); color: var(--yellow-ink);
     font-size: 10.5px; font-weight: 800;
+    flex: none;
 }
-.topbar-spacer { flex: 1; }
-.topbar-user { display: flex; align-items: center; gap: 10px; }
-.topbar-user .me-name { font-size: 13.5px; font-weight: 700; line-height: 1.2; }
-.topbar-user .me-mail { font-size: 11.5px; color: var(--muted); }
-.topbar-burger { display: none; }
 
-.topbar-mobile-nav {
-    display: none;
-    position: fixed; inset: var(--topbar-h) 0 0 0; z-index: 39;
-    background: rgba(255,255,255,.98);
-    backdrop-filter: blur(10px);
-    padding: 14px;
-    flex-direction: column; gap: 4px;
-}
-.topbar-mobile-nav a {
-    display: flex; align-items: center; gap: 12px;
-    padding: 14px 16px;
+.sidebar-divider { height: 1px; background: var(--stroke); margin: 8px 14px; flex: none; }
+
+.sidebar-foot { flex: none; padding: 10px 12px 14px; }
+.sidebar-user {
+    display: flex; align-items: center; gap: 11px;
+    padding: 9px 8px;
     border-radius: var(--r-md);
-    font-weight: 700; font-size: 15px;
-    color: var(--ink-dim); text-decoration: none;
+    margin-bottom: 4px;
+    overflow: hidden;
 }
-.topbar-mobile-nav a.active { background: var(--yellow-50); color: var(--yellow-700); }
+.sidebar-user .meta { min-width: 0; overflow: hidden; }
+.sidebar-user .me-name { font-size: 13px; font-weight: 700; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sidebar-user .me-mail { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.sidebar-collapse-btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; padding: 9px;
+    border-radius: var(--r-md);
+    color: var(--muted);
+    font-size: 13px; font-weight: 600;
+}
+.sidebar-collapse-btn:hover { background: var(--surface-3); color: var(--ink); }
+.sidebar-collapse-btn i { transition: transform .25s var(--ease); }
+:root.sidebar-collapsed .sidebar-collapse-btn i { transform: rotate(180deg); }
+
+/* collapsed: icon-rail only — hide every label, center icons, brand text,
+   user meta and nav labels all fold away smoothly */
+:root.sidebar-collapsed .sidebar-brand .brand-text,
+:root.sidebar-collapsed .sidebar-nav .label,
+:root.sidebar-collapsed .sidebar-nav .badge-dot,
+:root.sidebar-collapsed .sidebar-logout .label,
+:root.sidebar-collapsed .sidebar-user .meta,
+:root.sidebar-collapsed .sidebar-collapse-btn .label {
+    display: none;
+}
+:root.sidebar-collapsed .sidebar-nav a,
+:root.sidebar-collapsed .sidebar-logout,
+:root.sidebar-collapsed .sidebar-user { justify-content: center; }
+:root.sidebar-collapsed .sidebar-nav a.active::before { left: -12px; }
+
+/* ---------- mobile top bar + off-canvas drawer ---------- */
+.mobile-topbar { display: none; }
+.sidebar-burger { display: none; }
+.sidebar-scrim { display: none; }
 
 @media (max-width: 860px) {
-    .topbar-nav { display: none; }
-    .topbar-burger { display: inline-flex; }
-    .topbar-user .me-mail { display: none; }
+    .shell { margin-left: 0 !important; padding-top: var(--mobile-topbar-h); }
+
+    .app-sidebar {
+        width: min(82vw, 288px) !important;
+        transform: translateX(-104%);
+        box-shadow: var(--shadow-lg);
+        z-index: 60;
+    }
+    :root.mobile-nav-open .app-sidebar { transform: translateX(0); }
+    :root.sidebar-collapsed .app-sidebar .sidebar-brand .brand-text,
+    :root.sidebar-collapsed .app-sidebar .sidebar-nav .label,
+    :root.sidebar-collapsed .app-sidebar .sidebar-nav .badge-dot,
+    :root.sidebar-collapsed .app-sidebar .sidebar-logout .label,
+    :root.sidebar-collapsed .app-sidebar .sidebar-user .meta {
+        display: flex; /* labels always shown in the mobile drawer regardless of desktop collapse state */
+    }
+    :root.sidebar-collapsed .app-sidebar .sidebar-nav .label { display: inline; }
+    .sidebar-collapse-btn { display: none; } /* collapse is a desktop-only concept */
+
+    .mobile-topbar {
+        display: flex; align-items: center; gap: 12px;
+        position: fixed; top: 0; left: 0; right: 0; z-index: 45;
+        height: var(--mobile-topbar-h);
+        padding: 0 16px;
+        background: rgba(255,255,255,.92);
+        backdrop-filter: blur(14px);
+        border-bottom: 1px solid var(--stroke);
+    }
+    .mobile-topbar .brand-text { font-size: 14px; }
+    .sidebar-burger {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 38px; height: 38px; border-radius: var(--r-pill);
+        color: var(--ink);
+        flex: none;
+    }
+    .sidebar-burger:hover { background: var(--surface-3); }
+
+    .sidebar-scrim {
+        display: none;
+        position: fixed; inset: 0; z-index: 55;
+        background: rgba(28,24,10,.32);
+    }
+    :root.mobile-nav-open .sidebar-scrim { display: block; }
 }
 
 .avatar {
@@ -636,3 +742,58 @@ body::before {
 
 /* ---------- 13. Fade-up utility for staggered entrances ---------- */
 .fade-up { animation: rise .5s var(--ease) both; }
+
+/* ---------- 14. Toggle switch (Settings page) ---------- */
+.toggle-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    padding: 14px 2px;
+    border-bottom: 1px solid var(--stroke);
+}
+.toggle-row:last-child { border-bottom: 0; }
+.toggle-row .meta { min-width: 0; }
+.toggle-row .meta .title { font-weight: 700; font-size: 14px; margin-bottom: 2px; }
+.toggle-row .meta .desc { font-size: 12.5px; color: var(--muted); line-height: 1.5; }
+
+.toggle {
+    position: relative;
+    display: inline-flex; flex: none;
+    width: 46px; height: 27px;
+    border-radius: var(--r-pill);
+    background: var(--surface-3);
+    border: 1px solid var(--stroke);
+    cursor: pointer;
+    transition: background .2s var(--ease), border-color .2s var(--ease);
+}
+.toggle input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.toggle .knob {
+    position: absolute; top: 2px; left: 2px;
+    width: 21px; height: 21px;
+    border-radius: 50%;
+    background: var(--white);
+    box-shadow: 0 1px 3px rgba(28,24,10,.3);
+    transition: transform .2s var(--ease);
+}
+.toggle.on { background: var(--grad-brand); border-color: transparent; }
+.toggle.on .knob { transform: translateX(19px); }
+
+/* ---------- 15. Local-preference badge ---------- */
+.pref-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px;
+    border-radius: var(--r-pill);
+    background: var(--surface-3);
+    color: var(--muted);
+    font-size: 11px; font-weight: 700; letter-spacing: .02em; text-transform: uppercase;
+}
+.pref-badge.synced { background: var(--ok-soft); color: var(--ok); }
+
+/* ---------- 16. Labelled info row (Profile / Settings account info) ---------- */
+.info-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--stroke);
+    font-size: 13.5px;
+}
+.info-row:last-child { border-bottom: 0; }
+.info-row span { color: var(--muted); }
+.info-row strong { font-weight: 700; text-align: right; }

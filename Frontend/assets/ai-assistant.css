@@ -10,7 +10,7 @@
     margin: 0 auto;
     padding: 26px 22px 26px;
     display: flex; flex-direction: column;
-    height: calc(100vh - var(--topbar-h));
+    flex: 1;
     min-height: 0;
 }
 

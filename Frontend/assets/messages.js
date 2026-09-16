@@ -169,6 +169,10 @@
 
     function publishTyping(peerEmail, isTyping) {
         if (!state.connected || !state.client) return;
+        // Chat setting (local preference, not a server capability): if the
+        // user has opted out of sharing their typing status, simply never
+        // publish it — the composer/autosize UX is unaffected either way.
+        if (!A.loadPrefs(state.myEmail).shareTypingStatus) return;
         try {
             state.client.publish({ destination: "/app/chat.typing", body: JSON.stringify({ receiverEmail: peerEmail, typing: isTyping }) });
         } catch (e) {}
@@ -331,6 +335,27 @@
             if (!mine) refreshSmartReplies();
         } else if (!mine) {
             A.toast(A.displayName(peer) + " sent a message");
+        }
+
+        if (!mine) notifyIncoming(peer, msg.content);
+    }
+
+    /**
+     * Notification/chat settings are local-only preferences, never sent to
+     * the backend — this is the one place that reads them for real-time
+     * messages (a fresh page load ignores them, since there's nothing to
+     * alert about there).
+     */
+    function notifyIncoming(peer, content) {
+        const prefs = A.loadPrefs(state.myEmail);
+        if (prefs.notifySound && (state.active !== peer || document.hidden)) {
+            A.playPing();
+        }
+        if (prefs.notifyDesktop && document.hidden) {
+            A.showDesktopNotification(
+                A.displayName(peer),
+                prefs.notifyPreview ? content : "Sent you a new message"
+            );
         }
     }
 
@@ -496,7 +521,15 @@
        EVENTS
        ============================================================ */
     els.sendBtn.addEventListener("click", send);
-    els.input.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } });
+    els.input.addEventListener("keydown", (e) => {
+        if (e.key !== "Enter") return;
+        // Chat setting (local preference): Enter sends by default (Shift+Enter
+        // for a newline); if turned off, Enter always makes a newline and
+        // Ctrl/Cmd+Enter sends instead — a common alternate binding.
+        const enterSends = A.loadPrefs(state.myEmail).sendWithEnter;
+        const wantsSend = enterSends ? !e.shiftKey : (e.ctrlKey || e.metaKey);
+        if (wantsSend) { e.preventDefault(); send(); }
+    });
     els.input.addEventListener("input", () => { autoGrow(); notifyTyping(); });
     els.searchInput.addEventListener("input", renderChatList);
 

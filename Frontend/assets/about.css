@@ -1,0 +1,27 @@
+.about-hero { text-align: center; max-width: 640px; margin: 10px auto 34px; }
+.about-hero h1 { font-size: clamp(24px, 3vw, 32px); line-height: 1.2; margin-bottom: 14px; }
+.about-hero .lede { color: var(--ink-dim); font-size: 14.5px; line-height: 1.75; }
+
+.about-feature-grid .stat-card { align-items: flex-start; }
+.feature-title { font-weight: 700; font-size: 14.5px; }
+.feature-desc { font-size: 12.5px; color: var(--muted); line-height: 1.6; }
+
+.tech-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+@media (max-width: 860px) { .tech-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.tech-chip {
+    display: flex; align-items: center; gap: 12px;
+    padding: 15px;
+    background: var(--surface);
+    border: 1px solid var(--stroke);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-sm);
+    animation: rise .4s var(--ease) both;
+}
+.tech-chip i { font-size: 19px; color: var(--yellow-700); width: 26px; text-align: center; flex: none; }
+.tech-name { font-weight: 700; font-size: 13.5px; }
+.tech-desc { font-size: 11.5px; color: var(--muted); }

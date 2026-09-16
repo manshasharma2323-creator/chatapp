@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Settings — AI Chat Hub</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="assets/theme.css">
+    <link rel="stylesheet" href="assets/settings.css">
+</head>
+<body>
+
+<div id="shell"></div>
+
+<div class="shell">
+    <main class="page" style="max-width:820px">
+        <div class="page-head fade-up">
+            <h1>Settings</h1>
+            <p>Manage your account and how AI Chat Hub behaves for you.</p>
+        </div>
+
+        <!-- ---------- Account (backend-connected) ---------- -->
+        <div class="card card-pad fade-up settings-section">
+            <div class="section-head">
+                <h2>Account settings</h2>
+                <span class="pref-badge synced"><i class="fa-solid fa-cloud"></i> Synced to your account</span>
+            </div>
+            <div class="info-row"><span>Signed in as</span><strong id="settingsEmail">—</strong></div>
+            <div class="info-row"><span>Display name &amp; password</span>
+                <a class="link-btn" href="profile.html">Edit in Profile</a>
+            </div>
+        </div>
+
+        <!-- ---------- Notifications (local/browser only) ---------- -->
+        <div class="card card-pad fade-up settings-section" style="animation-delay:.05s">
+            <div class="section-head">
+                <h2>Notification preferences</h2>
+                <span class="pref-badge"><i class="fa-solid fa-laptop"></i> Saved on this device</span>
+            </div>
+            <p class="settings-note">These control your browser only — there's no server-side notification
+                system, so nothing here is synced to your account or other devices.</p>
+
+            <div class="toggle-row">
+                <div class="meta"><div class="title">Desktop notifications</div><div class="desc">Show a system notification for new messages when this tab isn't focused.</div></div>
+                <label class="toggle" id="toggleDesktop"><input type="checkbox"><span class="knob"></span></label>
+            </div>
+            <div class="toggle-row">
+                <div class="meta"><div class="title">Show message preview</div><div class="desc">Include the message text in the notification, instead of just a name.</div></div>
+                <label class="toggle" id="toggleTeaser"><input type="checkbox"><span class="knob"></span></label>
+            </div>
+            <div class="toggle-row">
+                <div class="meta"><div class="title">Sound on new message</div><div class="desc">Play a short sound when a message arrives.</div></div>
+                <div style="display:flex;align-items:center;gap:10px">
+                    <button class="btn-ghost" id="testSoundBtn" style="padding:8px 12px;font-size:12px">Test</button>
+                    <label class="toggle" id="toggleSound"><input type="checkbox"><span class="knob"></span></label>
+                </div>
+            </div>
+        </div>
+
+        <!-- ---------- Chat settings (local only) ---------- -->
+        <div class="card card-pad fade-up settings-section" style="animation-delay:.1s">
+            <div class="section-head">
+                <h2>Chat settings</h2>
+                <span class="pref-badge"><i class="fa-solid fa-laptop"></i> Saved on this device</span>
+            </div>
+
+            <div class="toggle-row">
+                <div class="meta"><div class="title">Send with Enter</div><div class="desc">Enter sends your message (Shift+Enter for a new line). Turn off to use Ctrl/Cmd+Enter to send instead.</div></div>
+                <label class="toggle" id="toggleEnterSend"><input type="checkbox"><span class="knob"></span></label>
+            </div>
+            <div class="toggle-row">
+                <div class="meta"><div class="title">Share typing status</div><div class="desc">Let the person you're chatting with see when you're typing.</div></div>
+                <label class="toggle" id="toggleTyping"><input type="checkbox"><span class="knob"></span></label>
+            </div>
+        </div>
+
+        <!-- ---------- Security information (real, informational) ---------- -->
+        <div class="card card-pad fade-up settings-section" style="animation-delay:.15s">
+            <div class="section-head"><h2>Security information</h2></div>
+            <div class="info-row"><span>Authentication</span><strong>JWT bearer token</strong></div>
+            <div class="info-row"><span>Password storage</span><strong>Hashed with bcrypt</strong></div>
+            <div class="info-row"><span>Session</span><strong>Stateless — token kept in this browser only</strong></div>
+        </div>
+
+        <!-- ---------- Logout ---------- -->
+        <div class="card card-pad fade-up settings-section" style="animation-delay:.2s">
+            <div class="section-head"><h2>Logout</h2></div>
+            <p class="settings-note" style="margin-bottom:14px">Signs you out on this device. You'll need your email and password to sign back in.</p>
+            <button class="btn-ghost" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i>&nbsp; Sign out</button>
+        </div>
+    </main>
+</div>
+
+<div class="toast-area" id="toastArea"></div>
+
+<script src="assets/api.js"></script>
+<script src="assets/settings.js"></script>
+</body>
+</html>

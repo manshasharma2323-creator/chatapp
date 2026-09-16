@@ -167,6 +167,71 @@ window.App = (function () {
         try { localStorage.setItem(chatStoreKey(email), JSON.stringify(chats)); } catch (e) { /* ignore */ }
     }
 
+    /* ---------- local preferences (per signed-in user) ----------
+       Purely client-side UI/behaviour preferences the backend has no
+       concept of — namespaced per user so switching accounts on the
+       same device doesn't leak one person's settings to another. */
+    const DEFAULT_PREFS = {
+        notifyDesktop: false,
+        notifyPreview: true,
+        notifySound: true,
+        sendWithEnter: true,
+        shareTypingStatus: true
+    };
+
+    function prefsKey(email) { return "aichathub:prefs:" + email; }
+
+    function loadPrefs(email) {
+        try {
+            const raw = localStorage.getItem(prefsKey(email));
+            return Object.assign({}, DEFAULT_PREFS, raw ? JSON.parse(raw) : {});
+        } catch (e) { return Object.assign({}, DEFAULT_PREFS); }
+    }
+
+    function savePrefs(email, prefs) {
+        try { localStorage.setItem(prefsKey(email), JSON.stringify(prefs)); } catch (e) { /* ignore */ }
+    }
+
+    function setPref(email, key, value) {
+        const prefs = loadPrefs(email);
+        prefs[key] = value;
+        savePrefs(email, prefs);
+        return prefs;
+    }
+
+    /* ---------- notifications / sound ----------
+       Real browser capabilities (Web Audio + Notification API), driven by
+       the local preferences above — not backed by the server, but not
+       faked either: a granted permission plays an actual OS notification. */
+    let audioCtx = null;
+    function playPing() {
+        try {
+            audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.18, audioCtx.currentTime + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.28);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.3);
+        } catch (e) { /* Web Audio unavailable — non-fatal */ }
+    }
+
+    async function requestNotificationPermission() {
+        if (!("Notification" in window)) return "unsupported";
+        if (Notification.permission === "granted" || Notification.permission === "denied") return Notification.permission;
+        try { return await Notification.requestPermission(); } catch (e) { return "denied"; }
+    }
+
+    function showDesktopNotification(title, body) {
+        if (!("Notification" in window) || Notification.permission !== "granted") return;
+        try { new Notification(title, { body }); } catch (e) { /* non-fatal */ }
+    }
+
     /* ---------- toasts ---------- */
     function ensureToastArea() {
         let area = document.getElementById("toastArea");
@@ -195,17 +260,23 @@ window.App = (function () {
         }, 2600);
     }
 
-    /* ---------- shared topbar/nav shell ----------
+    /* ---------- shared sidebar nav shell ----------
        Every authenticated page has <div id="shell"></div> right after
-       <body>; this injects the topbar + mobile nav + aurora background
-       and wires sign-out / mobile menu, so nav markup lives in one
-       place instead of six duplicated copies. */
+       <body>; this injects the sidebar (+ a slim mobile top bar) and the
+       aurora background, and wires sign-out / collapse / mobile drawer,
+       so nav markup lives in one place instead of nine duplicated copies. */
     const NAV_ITEMS = [
         { key: "dashboard", href: "dashboard.html", icon: "fa-grid-2", label: "Dashboard" },
         { key: "messages", href: "messages.html", icon: "fa-comments", label: "Messages" },
         { key: "assistant", href: "ai-assistant.html", icon: "fa-wand-magic-sparkles", label: "AI Assistant" },
-        { key: "contacts", href: "contacts.html", icon: "fa-address-book", label: "Contacts" }
+        { key: "contacts", href: "contacts.html", icon: "fa-address-book", label: "Contacts" },
+        { key: "chatHistory", href: "chat-history.html", icon: "fa-clock-rotate-left", label: "Chat History" },
+        { key: "profile", href: "profile.html", icon: "fa-user", label: "Profile" },
+        { key: "settings", href: "settings.html", icon: "fa-gear", label: "Settings" },
+        { key: "about", href: "about.html", icon: "fa-circle-info", label: "About" }
     ];
+
+    const SIDEBAR_COLLAPSE_KEY = "aichathub:sidebarCollapsed";
 
     function initShell(active) {
         const session = requireSession();
@@ -216,42 +287,58 @@ window.App = (function () {
 
         const email = session.email;
 
-        const navLinks = (cls) => NAV_ITEMS.map((item) =>
+        let collapsed = false;
+        try { collapsed = localStorage.getItem(SIDEBAR_COLLAPSE_KEY) === "1"; } catch (e) { /* ignore */ }
+        document.documentElement.classList.toggle("sidebar-collapsed", collapsed);
+
+        const navLinks = NAV_ITEMS.map((item) =>
             '<a class="' + (item.key === active ? "active" : "") + '" href="' + item.href + '">' +
-            '<i class="fa-solid ' + item.icon + '"></i><span>' + item.label + "</span>" +
+            '<i class="fa-solid ' + item.icon + '"></i><span class="label">' + item.label + "</span>" +
             '<span class="badge-dot" id="navBadge_' + item.key + '" hidden></span>' +
             "</a>"
         ).join("");
 
         shell.innerHTML =
             '<div class="aurora" aria-hidden="true"><span class="a1"></span><span class="a2"></span><span class="a3"></span></div>' +
-            '<header class="topbar">' +
-            '<a class="topbar-brand" href="dashboard.html">' +
+            '<div class="sidebar-scrim" id="sidebarScrim"></div>' +
+
+            '<aside class="app-sidebar" id="appSidebar">' +
+            '<a class="sidebar-brand" href="dashboard.html">' +
             '<div class="logo"><i class="fa-solid fa-bolt"></i></div>' +
-            '<div><div class="brand-name">AI Chat Hub</div><div class="brand-tag">Real-time messaging</div></div>' +
+            '<div class="brand-text"><div class="brand-name">AI Chat Hub</div><div class="brand-tag">Real-time messaging</div></div>' +
             "</a>" +
-            '<nav class="topbar-nav">' + navLinks() + "</nav>" +
-            '<div class="topbar-spacer"></div>' +
-            '<div class="topbar-user">' +
-            '<div><div class="me-name">' + esc(displayName(email)) + '</div><div class="me-mail">' + esc(email) + "</div></div>" +
+            '<nav class="sidebar-nav">' + navLinks + "</nav>" +
+            '<div class="sidebar-divider"></div>' +
+            '<div class="sidebar-foot">' +
+            '<div class="sidebar-user">' +
             '<div class="avatar avatar-sm" style="background:' + ramp(email) + '"><span>' + esc(initials(email)) + "</span></div>" +
-            '<button class="icon-btn" id="shellSignOut" title="Sign out" aria-label="Sign out"><i class="fa-solid fa-right-from-bracket"></i></button>' +
-            '<button class="icon-btn topbar-burger" id="shellBurger" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>' +
+            '<div class="meta"><div class="me-name">' + esc(displayName(email)) + '</div><div class="me-mail">' + esc(email) + "</div></div>" +
             "</div>" +
-            "</header>" +
-            '<nav class="topbar-mobile-nav" id="shellMobileNav">' + navLinks() + "</nav>";
+            '<button class="sidebar-logout" id="shellSignOut" title="Sign out"><i class="fa-solid fa-right-from-bracket"></i><span class="label">Sign out</span></button>' +
+            '<button class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="Collapse sidebar"><i class="fa-solid fa-angles-left"></i><span class="label">Collapse</span></button>' +
+            "</div>" +
+            "</aside>" +
+
+            '<header class="mobile-topbar">' +
+            '<button class="sidebar-burger" id="sidebarBurger" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>' +
+            '<div class="logo"><i class="fa-solid fa-bolt"></i></div>' +
+            '<div class="brand-text" style="font-weight:800">AI Chat Hub</div>' +
+            "</header>";
 
         document.getElementById("shellSignOut").addEventListener("click", signOut);
 
-        const burger = document.getElementById("shellBurger");
-        const mobileNav = document.getElementById("shellMobileNav");
-        if (burger && mobileNav) {
-            burger.addEventListener("click", () => {
-                const open = mobileNav.style.display === "flex";
-                mobileNav.style.display = open ? "none" : "flex";
-                burger.querySelector("i").className = open ? "fa-solid fa-bars" : "fa-solid fa-xmark";
-            });
-        }
+        document.getElementById("sidebarCollapseBtn").addEventListener("click", () => {
+            const next = !document.documentElement.classList.contains("sidebar-collapsed");
+            document.documentElement.classList.toggle("sidebar-collapsed", next);
+            try { localStorage.setItem(SIDEBAR_COLLAPSE_KEY, next ? "1" : "0"); } catch (e) { /* ignore */ }
+        });
+
+        function closeMobileNav() { document.documentElement.classList.remove("mobile-nav-open"); }
+        document.getElementById("sidebarBurger").addEventListener("click", () => {
+            document.documentElement.classList.add("mobile-nav-open");
+        });
+        document.getElementById("sidebarScrim").addEventListener("click", closeMobileNav);
+        document.querySelectorAll(".sidebar-nav a").forEach((a) => a.addEventListener("click", closeMobileNav));
 
         // Real unread-count badge on the Messages nav item — same server
         // endpoint the messages page itself uses.
@@ -262,6 +349,20 @@ window.App = (function () {
                 setNavBadge("messages", total);
             })
             .catch(() => { /* non-fatal */ });
+
+        // The sidebar renders immediately with the email-derived display
+        // name (same heuristic used everywhere before /api/users/me
+        // existed); swap in the real saved name once it loads, so a
+        // renamed profile is reflected app-wide instead of just on the
+        // Profile page itself.
+        authFetch("/api/users/me")
+            .then((r) => (r.ok ? r.json() : null))
+            .then((data) => {
+                if (!data || !data.name) return;
+                const nameEl = shell.querySelector(".sidebar-user .me-name");
+                if (nameEl) nameEl.textContent = data.name;
+            })
+            .catch(() => { /* non-fatal — email-derived name stays */ });
 
         return session;
     }
@@ -279,6 +380,8 @@ window.App = (function () {
         authFetch, authHeaders,
         esc, initials, displayName, ramp, clockTime, dayKey, dayLabel, relativeTime,
         loadChats, saveChats,
+        loadPrefs, setPref,
+        playPing, requestNotificationPermission, showDesktopNotification,
         toast,
         initShell, setNavBadge
     };

@@ -8,12 +8,14 @@
     flex: 1;
     display: flex;
     min-height: 0;
-    height: calc(100vh - var(--topbar-h));
 }
 
 .scrim {
-    position: fixed; inset: var(--topbar-h) 0 0 0; z-index: 29;
+    position: fixed; inset: 0; z-index: 29;
     background: rgba(28,24,10,.28);
+}
+@media (max-width: 860px) {
+    .scrim { inset: var(--mobile-topbar-h) 0 0 0; }
 }
 
 /* ---------- sidebar ---------- */
@@ -246,7 +248,7 @@
 /* ---------- responsive ---------- */
 @media (max-width: 860px) {
     .msg-sidebar {
-        position: fixed; top: var(--topbar-h); left: 0; bottom: 0; z-index: 30;
+        position: fixed; top: var(--mobile-topbar-h); left: 0; bottom: 0; z-index: 30;
         transform: translateX(-104%);
         transition: transform .28s var(--ease);
         box-shadow: var(--shadow-lg);

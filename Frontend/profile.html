@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Profile — AI Chat Hub</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="assets/theme.css">
+    <link rel="stylesheet" href="assets/profile.css">
+</head>
+<body>
+
+<div id="shell"></div>
+
+<div class="shell">
+    <main class="page" style="max-width:920px">
+        <div class="page-head fade-up">
+            <h1>Profile</h1>
+            <p>Your account, at a glance.</p>
+        </div>
+
+        <div class="grid-2">
+            <div class="card card-pad fade-up profile-card">
+                <div class="avatar avatar-lg" id="profileAvatar" style="font-size:26px"><span>—</span></div>
+                <div class="profile-name" id="profileName">—</div>
+                <div class="profile-mail" id="profileMail">—</div>
+                <span class="presence-pill" id="profilePresence"><span class="dot"></span>Checking…</span>
+
+                <div class="msg-ok" id="profileSaveOk" hidden></div>
+                <div class="msg-error" id="profileError" hidden></div>
+
+                <div class="field" style="margin-top:18px">
+                    <label for="profileNameInput">Display name</label>
+                    <input id="profileNameInput" type="text" placeholder="Your name">
+                </div>
+                <button class="btn-primary" id="saveNameBtn"><i class="fa-solid fa-check"></i>&nbsp; Save name</button>
+
+                <div class="sidebar-divider" style="margin:20px 0"></div>
+
+                <div class="section-head" style="margin-bottom:10px"><h2 style="font-size:14px">Change password</h2></div>
+                <div class="field">
+                    <label for="currentPassword">Current password</label>
+                    <div class="pw-wrap">
+                        <input id="currentPassword" type="password" placeholder="Current password">
+                        <button type="button" class="pw-toggle" id="pwToggle1"><i class="fa-regular fa-eye"></i></button>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="newPassword">New password</label>
+                    <div class="pw-wrap">
+                        <input id="newPassword" type="password" placeholder="At least 6 characters">
+                        <button type="button" class="pw-toggle" id="pwToggle2"><i class="fa-regular fa-eye"></i></button>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="confirmNewPassword">Confirm new password</label>
+                    <div class="pw-wrap">
+                        <input id="confirmNewPassword" type="password" placeholder="Re-enter new password">
+                        <button type="button" class="pw-toggle" id="pwToggle3"><i class="fa-regular fa-eye"></i></button>
+                    </div>
+                </div>
+                <button class="btn-ghost" id="savePasswordBtn" style="width:100%"><i class="fa-solid fa-lock"></i>&nbsp; Update password</button>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:20px">
+                <div class="card card-pad fade-up" style="animation-delay:.08s">
+                    <div class="section-head"><h2>Account information</h2></div>
+                    <div class="info-row"><span>Email</span><strong id="infoEmail">—</strong></div>
+                    <div class="info-row"><span>Authentication</span><strong>JWT bearer token</strong></div>
+                    <div class="info-row"><span>Password storage</span><strong>Hashed (bcrypt)</strong></div>
+                    <div class="info-row"><span>Presence</span><strong id="infoPresence">—</strong></div>
+                </div>
+
+                <div class="card card-pad fade-up" style="animation-delay:.14s">
+                    <div class="section-head"><h2>Your activity</h2></div>
+                    <div class="info-row"><span>Conversations on this device</span><strong id="infoConversations">—</strong></div>
+                    <div class="info-row"><span>Registered users</span><strong id="infoContacts">—</strong></div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div class="toast-area" id="toastArea"></div>
+
+<script src="assets/api.js"></script>
+<script src="assets/profile.js"></script>
+</body>
+</html>
