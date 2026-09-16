@@ -30,17 +30,17 @@
             </div>
             <div class="stat-card" style="animation-delay:.06s">
                 <div class="stat-icon"><i class="fa-solid fa-envelope"></i></div>
-                <div class="stat-value" id="statUnread">—</div>
+                <div class="stat-value" id="statUnread"><span class="skeleton stat-skel"></span></div>
                 <div class="stat-label">Unread messages</div>
             </div>
             <div class="stat-card" style="animation-delay:.1s">
                 <div class="stat-icon"><i class="fa-solid fa-circle-nodes"></i></div>
-                <div class="stat-value" id="statOnline">—</div>
+                <div class="stat-value" id="statOnline"><span class="skeleton stat-skel"></span></div>
                 <div class="stat-label">Online now</div>
             </div>
             <div class="stat-card" style="animation-delay:.14s">
                 <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
-                <div class="stat-value" id="statContacts">—</div>
+                <div class="stat-value" id="statContacts"><span class="skeleton stat-skel"></span></div>
                 <div class="stat-label">Registered users</div>
             </div>
         </div>
@@ -51,11 +51,7 @@
                     <h2>Recent activity</h2>
                     <a class="link-btn" href="messages.html">Open messages</a>
                 </div>
-                <div class="activity-list" id="activityList">
-                    <div class="skeleton" style="height:52px;margin-bottom:8px"></div>
-                    <div class="skeleton" style="height:52px;margin-bottom:8px"></div>
-                    <div class="skeleton" style="height:52px"></div>
-                </div>
+                <div class="activity-list" id="activityList"></div>
             </div>
 
             <div style="display:flex;flex-direction:column;gap:20px">

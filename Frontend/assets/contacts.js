@@ -20,7 +20,7 @@
         els.count.textContent = visible.length + (visible.length === 1 ? " person" : " people");
 
         if (!visible.length) {
-            els.grid.innerHTML = '<div class="empty-hint" style="grid-column:1/-1"><i class="fa-regular fa-face-frown"></i>No one matches that search.</div>';
+            els.grid.innerHTML = A.emptyState("fa-regular fa-face-frown", "No one matches that search.", "grid-column:1/-1");
             return;
         }
 
@@ -55,13 +55,13 @@
             online = new Set((onlineList || []).map((p) => (p.email || "").toLowerCase()));
 
             if (!contacts.length) {
-                els.grid.innerHTML = '<div class="empty-hint" style="grid-column:1/-1"><i class="fa-regular fa-address-book"></i>No other registered users yet.</div>';
+                els.grid.innerHTML = A.emptyState("fa-regular fa-address-book", "No other registered users yet.", "grid-column:1/-1");
                 els.count.textContent = "";
                 return;
             }
             render();
         }).catch(() => {
-            els.grid.innerHTML = '<div class="empty-hint" style="grid-column:1/-1"><i class="fa-solid fa-triangle-exclamation"></i>Couldn\'t load contacts. Try refreshing.</div>';
+            els.grid.innerHTML = A.emptyState("fa-solid fa-triangle-exclamation", "Couldn't load contacts. Try refreshing.", "grid-column:1/-1");
         });
     }
 

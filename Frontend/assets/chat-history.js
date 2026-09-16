@@ -31,7 +31,7 @@
 
         if (!visible.length) {
             els.list.innerHTML = conversations.length
-                ? '<div class="empty-hint"><i class="fa-regular fa-face-frown"></i>Nothing matches that search.</div>'
+                ? A.emptyState("fa-regular fa-face-frown", "Nothing matches that search.")
                 : emptyStateHtml();
             return;
         }
@@ -55,13 +55,8 @@
     }
 
     function emptyStateHtml() {
-        return (
-            '<div class="empty-hint">' +
-            '<i class="fa-regular fa-clock"></i>' +
-            "No conversations yet.<br>Start one from " +
-            '<a class="link-btn" href="contacts.html">Contacts</a>.' +
-            "</div>"
-        );
+        return A.emptyState("fa-regular fa-clock", "No conversations yet.<br>Start one from " +
+            '<a class="link-btn" href="contacts.html">Contacts</a>.');
     }
 
     async function load() {
@@ -101,7 +96,7 @@
 
             render();
         } catch (err) {
-            els.list.innerHTML = '<div class="empty-hint"><i class="fa-solid fa-triangle-exclamation"></i>Couldn\'t load chat history. Try refreshing.</div>';
+            els.list.innerHTML = A.emptyState("fa-solid fa-triangle-exclamation", "Couldn't load chat history. Try refreshing.");
         }
     }
 

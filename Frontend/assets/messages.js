@@ -285,14 +285,14 @@
 
     async function loadContacts() {
         if (!els.contactsList) return;
-        els.contactsList.innerHTML = '<div class="empty-hint" style="padding:16px">Loading…</div>';
+        els.contactsList.innerHTML = '<div style="padding:4px">' + A.skeletonRows(3, 46) + "</div>";
         try {
             const res = await A.authFetch("/api/users/contacts");
             if (!res.ok) throw new Error("failed");
             const list = await res.json();
 
             if (!Array.isArray(list) || !list.length) {
-                els.contactsList.innerHTML = '<div class="empty-hint" style="padding:16px">No other registered users yet.</div>';
+                els.contactsList.innerHTML = A.emptyState("fa-regular fa-address-book", "No other registered users yet.", "padding:16px");
                 return;
             }
 
@@ -311,7 +311,7 @@
                 btn.addEventListener("click", () => { els.newChatEmail.value = btn.dataset.email; });
             });
         } catch (err) {
-            els.contactsList.innerHTML = '<div class="empty-hint" style="padding:16px">Couldn\'t load users. You can still add someone by email below.</div>';
+            els.contactsList.innerHTML = A.emptyState("fa-solid fa-triangle-exclamation", "Couldn't load users. You can still add someone by email below.", "padding:16px");
         }
     }
 
@@ -394,10 +394,10 @@
         const visible = entries.filter((e) => !filter || e.email.includes(filter) || A.displayName(e.email).toLowerCase().includes(filter));
 
         if (!visible.length) {
-            els.chatList.innerHTML =
-                '<div class="empty-hint"><i class="fa-regular fa-comment-dots"></i>' +
-                (filter ? "Nothing matches that search." : 'No conversations yet.<br>Tap <strong>New</strong> to add someone.') +
-                "</div>";
+            els.chatList.innerHTML = A.emptyState(
+                "fa-regular fa-comment-dots",
+                filter ? "Nothing matches that search." : 'No conversations yet.<br>Tap <strong>New</strong> to add someone.'
+            );
             return;
         }
 

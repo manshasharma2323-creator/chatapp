@@ -38,7 +38,7 @@
 
     function paint(name, email) {
         els.avatar.style.background = A.ramp(email);
-        els.avatar.querySelector("span").textContent = A.esc(A.initials(email));
+        els.avatar.innerHTML = "<span>" + A.esc(A.initials(email)) + "</span>"; // replaces the loading skeleton, not just its text
         els.name.textContent = name;
         els.mail.textContent = email;
         els.nameInput.value = name;

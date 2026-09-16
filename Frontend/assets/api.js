@@ -260,6 +260,25 @@ window.App = (function () {
         }, 2600);
     }
 
+    /* ---------- small reusable UI fragments ----------
+       Every page rendered its own "no data yet" message and its own
+       loading placeholder bars — same markup, copy-pasted with a
+       different icon each time. These two helpers are that one pattern,
+       reused everywhere instead of duplicated. */
+    function emptyState(icon, html, extraStyle) {
+        const style = extraStyle ? ' style="' + extraStyle + '"' : "";
+        return '<div class="empty-hint"' + style + '><i class="' + icon + '"></i>' + html + "</div>";
+    }
+
+    function skeletonRows(count, height) {
+        height = height || 60;
+        let html = "";
+        for (let i = 0; i < count; i++) {
+            html += '<div class="skeleton" style="height:' + height + "px" + (i < count - 1 ? ";margin-bottom:10px" : "") + '"></div>';
+        }
+        return html;
+    }
+
     /* ---------- shared sidebar nav shell ----------
        Every authenticated page has <div id="shell"></div> right after
        <body>; this injects the sidebar (+ a slim mobile top bar) and the
@@ -382,7 +401,7 @@ window.App = (function () {
         loadChats, saveChats,
         loadPrefs, setPref,
         playPing, requestNotificationPermission, showDesktopNotification,
-        toast,
+        toast, emptyState, skeletonRows,
         initShell, setNavBadge
     };
 })();

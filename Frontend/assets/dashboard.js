@@ -33,8 +33,10 @@
 
     const activityList = $("activityList");
     if (!entries.length) {
-        activityList.innerHTML =
-            '<div class="empty-hint"><i class="fa-regular fa-comment-dots"></i>No conversations on this device yet.<br>Start one from Contacts or Messages.</div>';
+        activityList.innerHTML = A.emptyState(
+            "fa-regular fa-comment-dots",
+            "No conversations on this device yet.<br>Start one from Contacts or Messages."
+        );
     } else {
         activityList.innerHTML = entries.slice(0, 6).map((e) => (
             '<button class="activity-item" data-peer="' + A.esc(e.peer) + '">' +
