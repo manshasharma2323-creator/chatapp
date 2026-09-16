@@ -275,7 +275,7 @@ body::before {
 .auth-hero {
     position: relative;
     display: flex; flex-direction: column; justify-content: center;
-    padding: 56px 64px;
+    padding: 40px 64px;
     overflow: hidden;
 }
 .auth-hero-inner { position: relative; z-index: 1; max-width: 460px; }
@@ -293,51 +293,93 @@ body::before {
     line-height: 1.12;
     margin-bottom: 16px;
 }
-.auth-hero p.lede { color: var(--ink-dim); font-size: 16px; line-height: 1.6; margin-bottom: 34px; }
+.auth-hero p.lede { color: var(--ink-dim); font-size: 16px; line-height: 1.6; margin-bottom: 18px; }
 
-.orb-stage {
+/* ---------- 6b. Network visual (login/register hero) ----------
+   Replaces the old plain spinning orb with something that actually
+   depicts the product: people (avatar nodes) connected through a
+   central AI node, live message bubbles drifting between them, and
+   thin animated threads standing in for real-time delivery. Every
+   piece reuses existing tokens/components (.avatar, .status, the
+   brand gradient, .ai-pulse) rather than inventing a new visual
+   language just for this one graphic. */
+.network-visual {
     position: relative;
-    width: 260px; height: 260px;
-    margin-top: 8px;
+    width: 270px; height: 270px;
+    margin: 4px auto 0;
 }
-.orb {
-    position: absolute; inset: 0;
-    border-radius: 50%;
-    background: var(--grad-brand);
-    box-shadow: 0 40px 80px -24px rgba(246,193,0,.55);
-    animation: orb-float 6s var(--ease) infinite;
+.network-visual svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.network-visual .thread {
+    fill: none;
+    stroke: var(--yellow-500);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-dasharray: 3 7;
+    opacity: .5;
+    animation: thread-flow 2.4s linear infinite;
 }
-.orb::after {
-    content: "";
-    position: absolute; inset: 14%;
-    border-radius: 50%;
-    background: radial-gradient(circle at 32% 28%, rgba(255,255,255,.85), rgba(255,255,255,0) 60%);
-}
-.orb-ring {
-    position: absolute; inset: -18px;
-    border-radius: 50%;
-    border: 1.5px dashed rgba(246,193,0,.45);
-    animation: orb-spin 18s linear infinite;
-}
-.orb-chip {
+.network-visual .thread.t2 { animation-delay: -.6s; }
+.network-visual .thread.t3 { animation-delay: -1.3s; }
+@keyframes thread-flow { to { stroke-dashoffset: -20; } }
+
+.network-node {
     position: absolute;
-    display: flex; align-items: center; gap: 7px;
-    padding: 9px 13px;
+    transform: translate(-50%, -50%);
+}
+.network-node.ai {
+    left: 50%; top: 50%;
+    width: 78px; height: 78px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 22px;
+    background: var(--grad-brand);
+    color: var(--yellow-ink);
+    font-size: 28px;
+    box-shadow: 0 22px 44px -16px rgba(246,193,0,.6);
+    z-index: 2;
+}
+.network-node.user { z-index: 1; animation: node-float 5s var(--ease) infinite; }
+.network-node.user .avatar { width: 48px; height: 48px; font-size: 16px; border-radius: 15px; box-shadow: var(--shadow-md); }
+.network-node.user .status { width: 13px; height: 13px; border-width: 2.5px; }
+.network-node.u1 { left: 50%; top: 7%; animation-delay: 0s; }
+.network-node.u2 { left: 11%; top: 79%; animation-delay: 1.1s; }
+.network-node.u3 { left: 87%; top: 68%; animation-delay: 2.2s; }
+@keyframes node-float { 0%, 100% { transform: translate(-50%, -50%); } 50% { transform: translate(-50%, calc(-50% - 7px)); } }
+
+.network-bubble {
+    position: absolute;
+    display: flex; flex-direction: column; gap: 4px;
+    width: 52px; padding: 8px 9px;
+    background: var(--white);
+    border: 1px solid var(--stroke);
+    border-radius: 11px 11px 11px 3px;
+    box-shadow: var(--shadow-sm);
+    animation: bubble-float 4.5s var(--ease) infinite;
+}
+.network-bubble span { display: block; height: 4px; border-radius: var(--r-pill); background: var(--surface-3); }
+.network-bubble span:last-child { width: 60%; background: var(--yellow-100); }
+.network-bubble.b1 { top: 16%; left: 82%; animation-delay: .4s; }
+.network-bubble.b2 { top: 64%; left: 2%; border-radius: 11px 11px 3px 11px; animation-delay: 1.8s; }
+@keyframes bubble-float { 0%, 100% { transform: translateY(0); opacity: .96; } 50% { transform: translateY(-8px); opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+    .network-node.user, .network-bubble, .network-visual .thread { animation: none; }
+}
+
+.hero-features {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    margin-top: 20px;
+}
+.hero-features .feature-chip {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 13px;
     background: var(--white);
     border: 1px solid var(--stroke);
     border-radius: var(--r-pill);
-    box-shadow: var(--shadow-md);
     font-size: 12.5px; font-weight: 700;
-    animation: chip-bob 4.5s var(--ease) infinite;
+    color: var(--ink-dim);
+    box-shadow: var(--shadow-sm);
 }
-.orb-chip i { color: var(--yellow-600); }
-.orb-chip.c1 { top: -6px; left: -38px; animation-delay: .2s; }
-.orb-chip.c2 { bottom: 8px; right: -48px; animation-delay: 1.1s; }
-.orb-chip.c3 { bottom: -30px; left: 30px; animation-delay: 2s; }
-
-@keyframes orb-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
-@keyframes orb-spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
-@keyframes chip-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.hero-features .feature-chip i { color: var(--yellow-600); font-size: 12px; }
 
 .auth-panel {
     position: relative;
@@ -362,6 +404,18 @@ body::before {
     flex: none;
 }
 .logo-lg { width: 56px; height: 56px; font-size: 24px; border-radius: 17px; }
+
+/* pulsing ring — signals "this is the AI" wherever it's used (auth hero's
+   network node, the AI Assistant page's own header/empty-state logo) */
+.ai-pulse { position: relative; }
+.ai-pulse::after {
+    content: "";
+    position: absolute; inset: -6px;
+    border-radius: inherit;
+    border: 1.5px solid var(--yellow-300);
+    animation: ai-pulse 2.2s var(--ease) infinite;
+}
+@keyframes ai-pulse { 0% { transform: scale(.92); opacity: .9; } 100% { transform: scale(1.28); opacity: 0; } }
 .brand-name { font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 16px; }
 .brand-tag { font-size: 12px; color: var(--muted); }
 
