@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Messages — AI Chat Hub</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="assets/theme.css">
+    <link rel="stylesheet" href="assets/messages.css">
+</head>
+<body>
+
+<div id="shell"></div>
+
+<div class="shell">
+    <div class="chat-shell">
+        <div class="scrim" id="scrim" hidden></div>
+
+        <!-- ---------- conversations sidebar ---------- -->
+        <aside class="msg-sidebar" id="sidebar">
+            <div style="display:flex;align-items:center;gap:8px;padding:14px 16px 2px">
+                <span class="avatar-sm" style="width:9px;height:9px;border-radius:50%;background:var(--muted)" id="connDot"></span>
+                <span style="font-size:12px;color:var(--muted);font-weight:700" id="connText">Connecting…</span>
+            </div>
+
+            <div class="msg-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input id="searchInput" type="search" placeholder="Search conversations">
+            </div>
+
+            <div class="list-label">
+                <span>Conversations</span>
+                <button id="newChatBtn"><i class="fa-solid fa-plus"></i> New</button>
+            </div>
+
+            <div class="chat-list" id="chatList"></div>
+        </aside>
+
+        <!-- ---------- active conversation ---------- -->
+        <main class="chat-col">
+            <header class="chat-head">
+                <button class="icon-btn open-drawer" id="openDrawer" aria-label="Open conversations"><i class="fa-solid fa-bars"></i></button>
+                <div class="avatar avatar-sm" id="peerAvatar"><span>—</span><span class="status"></span></div>
+                <div class="meta">
+                    <div class="name" id="peerName">No conversation selected</div>
+                    <div class="sub" id="peerSub">Pick someone from the list</div>
+                </div>
+                <div class="head-actions">
+                    <button class="icon-btn" id="clearChatBtn" title="Clear this conversation" aria-label="Clear conversation">
+                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                    </button>
+                </div>
+            </header>
+
+            <div class="stream" id="stream">
+                <div class="stream-empty" id="streamEmpty">
+                    <div class="logo logo-lg"><i class="fa-solid fa-comments"></i></div>
+                    <h2>Start a conversation</h2>
+                    <p>Pick someone from the list, or add a new person from Contacts.
+                        Messages arrive on their screen the moment you hit send.</p>
+                </div>
+            </div>
+
+            <div class="typing" id="peerTyping" hidden aria-live="polite"><i></i><i></i><i></i></div>
+            <div class="typing" id="aiTyping" hidden aria-live="polite"><i></i><i></i><i></i></div>
+
+            <div class="composer-wrap">
+                <div class="ai-strip" id="aiStrip" hidden>
+                    <span class="ai-label"><i class="fa-solid fa-wand-magic-sparkles spark"></i> Smart reply</span>
+                    <div id="chipRow" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+                </div>
+
+                <div class="emoji-tray" id="emojiTray" hidden></div>
+
+                <div class="composer">
+                    <textarea id="input" rows="1" placeholder="Write a message…" aria-label="Message"></textarea>
+                    <div class="composer-tools">
+                        <button class="tool" id="emojiBtn" title="Emoji" aria-label="Emoji"><i class="fa-regular fa-face-smile"></i></button>
+                        <button class="tool" id="attachBtn" title="Attach file" aria-label="Attach file"><i class="fa-solid fa-paperclip"></i></button>
+                        <button class="tool ai" id="aiBtn" title="Suggest replies" aria-label="Suggest replies"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
+                    </div>
+                    <button class="send" id="sendBtn" aria-label="Send message"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- ---------- new conversation modal ---------- -->
+<div class="modal" id="newChatModal" hidden>
+    <div class="modal-card">
+        <h3>New conversation</h3>
+        <p>Pick a registered user, or enter their email directly.</p>
+
+        <div class="list-label" style="padding:0 0 8px"><span>Registered users</span></div>
+        <div class="contacts-list" id="contactsList">
+            <div class="empty-hint" style="padding:16px">Loading…</div>
+        </div>
+
+        <div class="field" style="margin-top:14px">
+            <label for="newChatEmail">Or enter email</label>
+            <input id="newChatEmail" type="email" placeholder="friend@example.com">
+        </div>
+        <div class="msg-error" id="newChatError" hidden></div>
+        <div class="modal-actions">
+            <button class="btn-ghost" id="newChatCancel">Cancel</button>
+            <button class="btn-primary" id="newChatConfirm" style="width:auto">Add</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast-area" id="toastArea"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+<script src="assets/api.js"></script>
+<script src="assets/messages.js"></script>
+</body>
+</html>

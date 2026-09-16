@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Create account — AI Chat Hub</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="assets/theme.css">
+</head>
+<body>
+
+<div class="auth-shell">
+
+    <section class="auth-hero">
+        <div class="aurora" aria-hidden="true"><span class="a1"></span><span class="a2"></span><span class="a3"></span></div>
+        <div class="auth-hero-inner">
+            <span class="eyebrow"><i class="fa-solid fa-wand-magic-sparkles"></i> AI-powered messaging</span>
+            <h1>Join in seconds,<br>start chatting<br>instantly.</h1>
+            <p class="lede">Create your account to get a private inbox, real-time
+                delivery, and an AI assistant that's always one click away.</p>
+
+            <div class="orb-stage">
+                <div class="orb-ring"></div>
+                <div class="orb"></div>
+                <div class="orb-chip c1"><i class="fa-solid fa-user-plus"></i> Free to join</div>
+                <div class="orb-chip c2"><i class="fa-solid fa-lock"></i> JWT-secured</div>
+                <div class="orb-chip c3"><i class="fa-solid fa-comments"></i> Real-time chat</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="auth-panel">
+        <div class="auth-card">
+            <div class="auth-mark">
+                <div class="logo logo-lg"><i class="fa-solid fa-bolt"></i></div>
+                <div>
+                    <div class="brand-name">AI Chat Hub</div>
+                    <div class="brand-tag">Real-time messaging</div>
+                </div>
+            </div>
+
+            <h1>Create your account</h1>
+            <p class="auth-sub">It only takes a moment.</p>
+
+            <div class="msg-error" id="authError" hidden></div>
+
+            <div class="field" id="nameField">
+                <label for="regName">Full name</label>
+                <input id="regName" type="text" autocomplete="name" placeholder="Jane Doe">
+            </div>
+
+            <div class="field" id="emailField">
+                <label for="regEmail">Email</label>
+                <input id="regEmail" type="email" autocomplete="username" placeholder="you@example.com">
+            </div>
+
+            <div class="field" id="passwordField">
+                <label for="regPassword">Password</label>
+                <div class="pw-wrap">
+                    <input id="regPassword" type="password" autocomplete="new-password" placeholder="At least 6 characters">
+                    <button type="button" class="pw-toggle" id="pwToggle1" aria-label="Show password"><i class="fa-regular fa-eye"></i></button>
+                </div>
+            </div>
+
+            <div class="field" id="confirmField">
+                <label for="regConfirm">Confirm password</label>
+                <div class="pw-wrap">
+                    <input id="regConfirm" type="password" autocomplete="new-password" placeholder="Re-enter your password">
+                    <button type="button" class="pw-toggle" id="pwToggle2" aria-label="Show password"><i class="fa-regular fa-eye"></i></button>
+                </div>
+            </div>
+
+            <button class="btn-primary" id="registerBtn">
+                <i class="fa-solid fa-user-plus"></i>&nbsp; Create account
+            </button>
+
+            <p class="auth-alt">
+                Already have an account? <a class="link-btn" href="login.html">Sign in</a>
+            </p>
+        </div>
+    </section>
+</div>
+
+<div class="toast-area" id="toastArea"></div>
+
+<script src="assets/api.js"></script>
+<script src="assets/register.js"></script>
+</body>
+</html>

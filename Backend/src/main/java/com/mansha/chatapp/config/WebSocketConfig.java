@@ -21,7 +21,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("*");
+                .setAllowedOriginPatterns("*")
+                .withSockJS()
+                // Auth is a stateless JWT bearer token, not a cookie, so SockJS
+                // doesn't need to probe third-party cookie support (which
+                // otherwise sends a credentialed request our wildcard-origin
+                // CORS config would have the browser block outright).
+                .setSessionCookieNeeded(false);
     }
 
     @Override

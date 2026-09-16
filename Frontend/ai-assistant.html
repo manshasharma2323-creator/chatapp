@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>AI Assistant — AI Chat Hub</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="assets/theme.css">
+    <link rel="stylesheet" href="assets/messages.css">
+    <link rel="stylesheet" href="assets/ai-assistant.css">
+</head>
+<body>
+
+<div id="shell"></div>
+
+<div class="shell">
+    <main class="ai-page">
+        <div class="ai-page-head">
+            <div class="logo logo-lg ai-pulse"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+            <div style="flex:1">
+                <h1>AI Assistant</h1>
+                <p>Your built-in AI co-pilot — ask anything, get real answers from your configured AI provider.</p>
+            </div>
+            <button class="btn-ghost" id="clearBtn"><i class="fa-solid fa-broom"></i> Clear conversation</button>
+        </div>
+
+        <div class="card ai-card">
+            <div class="stream" id="stream">
+                <div class="stream-empty" id="streamEmpty">
+                    <div class="logo logo-lg ai-pulse"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                    <h2>Hi! I'm your AI Assistant.</h2>
+                    <p>Ask me to explain something, help you write a message, brainstorm ideas, or just chat.</p>
+                    <div class="prompt-chips" id="promptChips"></div>
+                </div>
+            </div>
+
+            <div class="typing" id="aiTyping" hidden aria-live="polite"><i></i><i></i><i></i></div>
+
+            <div class="composer-wrap">
+                <div class="composer">
+                    <textarea id="input" rows="1" placeholder="Ask the AI assistant anything…" aria-label="Message the AI assistant"></textarea>
+                    <button class="send" id="sendBtn" aria-label="Send"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div class="toast-area" id="toastArea"></div>
+
+<script src="assets/api.js"></script>
+<script src="assets/ai-assistant.js"></script>
+</body>
+</html>

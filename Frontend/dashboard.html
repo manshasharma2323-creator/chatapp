@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Dashboard — AI Chat Hub</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="assets/theme.css">
+</head>
+<body>
+
+<div id="shell"></div>
+
+<div class="shell">
+    <main class="page">
+        <div class="page-head fade-up">
+            <h1 id="welcomeHeading">Welcome back</h1>
+            <p id="welcomeSub">Here's what's happening in your workspace.</p>
+        </div>
+
+        <div class="stat-grid">
+            <div class="stat-card" style="animation-delay:.02s">
+                <div class="stat-icon"><i class="fa-solid fa-comments"></i></div>
+                <div class="stat-value" id="statConversations">—</div>
+                <div class="stat-label">Total conversations</div>
+            </div>
+            <div class="stat-card" style="animation-delay:.06s">
+                <div class="stat-icon"><i class="fa-solid fa-envelope"></i></div>
+                <div class="stat-value" id="statUnread">—</div>
+                <div class="stat-label">Unread messages</div>
+            </div>
+            <div class="stat-card" style="animation-delay:.1s">
+                <div class="stat-icon"><i class="fa-solid fa-circle-nodes"></i></div>
+                <div class="stat-value" id="statOnline">—</div>
+                <div class="stat-label">Online now</div>
+            </div>
+            <div class="stat-card" style="animation-delay:.14s">
+                <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+                <div class="stat-value" id="statContacts">—</div>
+                <div class="stat-label">Registered users</div>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="card card-pad fade-up" style="animation-delay:.1s">
+                <div class="section-head">
+                    <h2>Recent activity</h2>
+                    <a class="link-btn" href="messages.html">Open messages</a>
+                </div>
+                <div class="activity-list" id="activityList">
+                    <div class="skeleton" style="height:52px;margin-bottom:8px"></div>
+                    <div class="skeleton" style="height:52px;margin-bottom:8px"></div>
+                    <div class="skeleton" style="height:52px"></div>
+                </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:20px">
+                <a href="ai-assistant.html" class="card card-pad fade-up" style="animation-delay:.16s;display:flex;gap:16px;align-items:center;text-decoration:none;border-color:var(--yellow-100);background:linear-gradient(135deg,var(--yellow-50),var(--white))">
+                    <div class="logo logo-lg"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+                    <div>
+                        <div style="font-weight:700;font-size:15.5px;margin-bottom:3px">Ask the AI Assistant</div>
+                        <div style="font-size:12.5px;color:var(--ink-dim)">Your always-on AI co-pilot — click to start a conversation.</div>
+                    </div>
+                </a>
+
+                <div class="card card-pad fade-up" style="animation-delay:.2s">
+                    <div class="section-head"><h2>Quick actions</h2></div>
+                    <div class="quick-actions">
+                        <button class="quick-action" id="qaNewChat">
+                            <i class="fa-solid fa-plus"></i>
+                            New chat
+                            <small>Start a conversation</small>
+                        </button>
+                        <a class="quick-action" href="contacts.html">
+                            <i class="fa-solid fa-address-book"></i>
+                            Contacts
+                            <small>Browse everyone</small>
+                        </a>
+                        <a class="quick-action" href="ai-assistant.html">
+                            <i class="fa-solid fa-robot"></i>
+                            AI Assistant
+                            <small>Ask anything</small>
+                        </a>
+                        <a class="quick-action" href="messages.html">
+                            <i class="fa-solid fa-comments"></i>
+                            Messages
+                            <small>All conversations</small>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div class="toast-area" id="toastArea"></div>
+
+<script src="assets/api.js"></script>
+<script src="assets/dashboard.js"></script>
+</body>
+</html>

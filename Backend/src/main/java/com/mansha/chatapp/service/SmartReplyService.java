@@ -11,12 +11,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
 public class SmartReplyService {
 
     private static final int HISTORY_LIMIT = 10;
+
+    // Ollama unloads its model when idle, so a cold call can take 20-30s to
+    // reload it. Bound the wait so the chat UI never hangs indefinitely —
+    // past this, fall back to the static suggestions below.
+    private static final long AI_TIMEOUT_SECONDS = 12;
 
     private final ChatClient openAiChatClient;
     private final ChatClient ollamaChatClient;
@@ -68,12 +75,15 @@ public class SmartReplyService {
                 "\nSuggest 3 short replies for \"Me\" to send next.";
 
         try {
-            String raw = activeClient()
-                    .prompt()
-                    .system(systemPrompt)
-                    .user(userPrompt)
-                    .call()
-                    .content();
+            ChatClient client = activeClient();
+            String raw = CompletableFuture
+                    .supplyAsync(() -> client
+                            .prompt()
+                            .system(systemPrompt)
+                            .user(userPrompt)
+                            .call()
+                            .content())
+                    .get(AI_TIMEOUT_SECONDS, TimeUnit.SECONDS);
 
             List<String> suggestions = parseSuggestions(raw);
             if (!suggestions.isEmpty()) {

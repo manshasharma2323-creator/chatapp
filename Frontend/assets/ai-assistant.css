@@ -1,0 +1,53 @@
+/* ============================================================
+   AI Assistant page — layout specific to this page only.
+   Bubbles/composer/typing-dots reuse assets/messages.css.
+   ============================================================ */
+
+.ai-page {
+    position: relative; z-index: 1;
+    flex: 1;
+    max-width: 900px; width: 100%;
+    margin: 0 auto;
+    padding: 26px 22px 26px;
+    display: flex; flex-direction: column;
+    height: calc(100vh - var(--topbar-h));
+    min-height: 0;
+}
+
+.ai-page-head { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; flex: none; }
+.ai-page-head h1 { font-size: 22px; margin-bottom: 2px; }
+.ai-page-head p { font-size: 13px; color: var(--ink-dim); }
+
+.ai-pulse { position: relative; }
+.ai-pulse::after {
+    content: "";
+    position: absolute; inset: -6px;
+    border-radius: inherit;
+    border: 1.5px solid var(--yellow-300);
+    animation: ai-pulse 2.2s var(--ease) infinite;
+}
+@keyframes ai-pulse { 0% { transform: scale(.92); opacity: .9; } 100% { transform: scale(1.28); opacity: 0; } }
+
+.ai-card {
+    flex: 1; min-height: 0;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+}
+
+.ai-card .stream { border-radius: var(--r-lg) var(--r-lg) 0 0; background: var(--white); }
+.ai-card .stream-empty { max-width: 420px; }
+
+.prompt-chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 6px; }
+.prompt-chip {
+    padding: 9px 15px;
+    background: var(--surface-3);
+    border: 1px solid var(--stroke);
+    border-radius: var(--r-pill);
+    font-size: 12.5px; font-weight: 600;
+    color: var(--ink-dim);
+    transition: background .15s var(--ease), border-color .15s var(--ease), transform .15s var(--ease);
+}
+.prompt-chip:hover { background: var(--yellow-50); border-color: var(--yellow-300); color: var(--yellow-ink); transform: translateY(-1px); }
+
+.ai-card .composer-wrap { border-radius: 0 0 var(--r-lg) var(--r-lg); }
+.ai-card .bubble.them { background: var(--yellow-50); border-color: var(--yellow-100); }

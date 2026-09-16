@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Sign in — AI Chat Hub</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="assets/theme.css">
+</head>
+<body>
+
+<div class="auth-shell">
+
+    <!-- ---------- hero / brand side ---------- -->
+    <section class="auth-hero">
+        <div class="aurora" aria-hidden="true"><span class="a1"></span><span class="a2"></span><span class="a3"></span></div>
+        <div class="auth-hero-inner">
+            <span class="eyebrow"><i class="fa-solid fa-wand-magic-sparkles"></i> AI-powered messaging</span>
+            <h1>Real conversations,<br>real-time — with an AI<br>co-pilot built in.</h1>
+            <p class="lede">Sign in to pick up your conversations, get smart reply
+                suggestions grounded in your chat history, and talk directly to
+                your built-in AI assistant.</p>
+
+            <div class="orb-stage">
+                <div class="orb-ring"></div>
+                <div class="orb"></div>
+                <div class="orb-chip c1"><i class="fa-solid fa-bolt"></i> Instant delivery</div>
+                <div class="orb-chip c2"><i class="fa-solid fa-wand-magic-sparkles"></i> Smart replies</div>
+                <div class="orb-chip c3"><i class="fa-solid fa-circle-check"></i> Secure JWT auth</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ---------- sign in form ---------- -->
+    <section class="auth-panel">
+        <div class="auth-card">
+            <div class="auth-mark">
+                <div class="logo logo-lg"><i class="fa-solid fa-bolt"></i></div>
+                <div>
+                    <div class="brand-name">AI Chat Hub</div>
+                    <div class="brand-tag">Real-time messaging</div>
+                </div>
+            </div>
+
+            <h1>Welcome back</h1>
+            <p class="auth-sub">Sign in with the account you registered.</p>
+
+            <div class="msg-error" id="authError" hidden></div>
+
+            <div class="field">
+                <label for="loginEmail">Email</label>
+                <input id="loginEmail" type="email" autocomplete="username" placeholder="you@example.com">
+            </div>
+
+            <div class="field">
+                <label for="loginPassword">Password</label>
+                <div class="pw-wrap">
+                    <input id="loginPassword" type="password" autocomplete="current-password" placeholder="••••••••">
+                    <button type="button" class="pw-toggle" id="pwToggle" aria-label="Show password">
+                        <i class="fa-regular fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="auth-row-split">
+                <label style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--ink-dim)">
+                    <input type="checkbox" id="rememberMe" style="width:auto"> Remember me
+                </label>
+                <button type="button" class="link-btn" id="forgotBtn">Forgot password?</button>
+            </div>
+
+            <button class="btn-primary" id="loginBtn">
+                <i class="fa-solid fa-arrow-right-to-bracket"></i>&nbsp; Sign in
+            </button>
+
+            <p class="auth-alt">
+                Don't have an account? <a class="link-btn" href="register.html">Create one</a>
+            </p>
+
+            <p class="auth-alt">
+                <button class="link-btn" id="tokenToggle" type="button">Have a JWT instead? Paste it</button>
+            </p>
+
+            <div id="tokenBlock" hidden>
+                <div class="field" style="margin-top:10px">
+                    <label for="manualToken">JWT token</label>
+                    <input id="manualToken" type="text" placeholder="eyJhbGciOi...">
+                </div>
+                <div class="field">
+                    <label for="manualEmail">Your email</label>
+                    <input id="manualEmail" type="email" placeholder="you@example.com">
+                </div>
+                <button class="btn-ghost" id="tokenLoginBtn" style="width:100%">Connect with token</button>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div class="toast-area" id="toastArea"></div>
+
+<script src="assets/api.js"></script>
+<script src="assets/login.js"></script>
+</body>
+</html>
