@@ -1,5 +1,6 @@
 package com.mansha.chatapp.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
 @Entity
@@ -44,6 +45,9 @@ public class User {
         this.email = email;
     }
 
+    // Accept a password on the way in (register/login request bodies) but
+    // never echo it back out (e.g. the register response), hashed or not.
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     public String getPassword() {
         return password;
     }
