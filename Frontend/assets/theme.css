@@ -169,6 +169,7 @@ body::before {
     color: var(--yellow-ink);
     font-weight: 700;
     font-size: 15px;
+    text-decoration: none;
     box-shadow: var(--glow-yellow);
     transition: transform .18s var(--ease), box-shadow .18s var(--ease), filter .18s var(--ease);
 }
@@ -184,6 +185,7 @@ body::before {
     border: 1px solid var(--stroke);
     font-weight: 600;
     color: var(--ink-dim);
+    text-decoration: none;
     transition: background .15s var(--ease), border-color .15s var(--ease);
 }
 .btn-ghost:hover { background: var(--surface-2); border-color: var(--stroke-hi); }
@@ -264,47 +266,84 @@ body::before {
     75% { transform: translateX(4px); }
 }
 
-/* ---------- 6. Auth pages (login / register) ---------- */
+/* ---------- 6. Auth pages (login / register) ----------
+   Deliberately NOT a re-run of the landing page: one centered card,
+   no marketing hero. The small illustration below (.auth-illustration)
+   is a compact, abstract node-and-thread graphic — visually distinct
+   from the landing hero's literal chat-window mock, so signing in
+   never looks like the homepage. */
 .auth-shell {
     position: relative;
     z-index: 1;
     min-height: 100vh;
-    display: grid;
-    grid-template-columns: 1.1fr 1fr;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
 }
-.auth-hero {
-    position: relative;
-    display: flex; flex-direction: column; justify-content: center;
-    padding: 40px 64px;
-    overflow: hidden;
-}
-.auth-hero-inner { position: relative; z-index: 1; max-width: 460px; }
-.auth-hero .eyebrow {
+
+/* shared badge — landing hero eyebrow ("AI-Powered · Real-Time ·
+   Secure") reuses this too */
+.eyebrow {
     display: inline-flex; align-items: center; gap: 8px;
     padding: 7px 14px;
     border-radius: var(--r-pill);
     background: var(--yellow-50);
     color: var(--yellow-700);
     font-weight: 700; font-size: 12.5px; letter-spacing: .03em; text-transform: uppercase;
-    margin-bottom: 22px;
 }
-.auth-hero h1 {
-    font-size: clamp(30px, 3.6vw, 42px);
-    line-height: 1.12;
-    margin-bottom: 16px;
-}
-.auth-hero p.lede { color: var(--ink-dim); font-size: 16px; line-height: 1.6; margin-bottom: 18px; }
 
-/* ---------- 6b. Chat preview (login/register hero) ----------
-   The old network diagram (avatars-and-lines around an AI node) was
-   too abstract to read at a glance. This is a literal, small mock of
-   the real product instead: a mini conversation window with actual
-   message bubbles, a typing indicator, delivery ticks, and a labelled
-   AI Assistant smart-reply — built from the exact .avatar/.status/
-   .bubble/.typing/.ai-label/.chip components the real Messages and AI
-   Assistant pages use, plus two small "someone else is online, a
-   message just landed" flourishes around the card. Meant to read as
-   "this is what the app looks like" within a couple of seconds. */
+.auth-illustration { position: relative; width: 100%; height: 90px; margin-bottom: 20px; }
+.auth-illustration svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.auth-illustration .thread {
+    fill: none; stroke: var(--yellow-500); stroke-width: 1.4;
+    stroke-linecap: round; stroke-dasharray: 3 6; opacity: .5;
+    animation: thread-flow 2.4s linear infinite;
+}
+.auth-illustration .thread.t2 { animation-delay: -.8s; }
+.auth-illustration .thread.t3 { animation-delay: -1.5s; }
+@keyframes thread-flow { to { stroke-dashoffset: -18; } }
+.auth-illustration .ai-node {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    width: 40px; height: 40px; border-radius: 12px;
+    background: var(--grad-brand); color: var(--yellow-ink);
+    display: flex; align-items: center; justify-content: center; font-size: 15px;
+    box-shadow: 0 10px 22px -8px rgba(246,193,0,.55);
+    z-index: 1;
+}
+.auth-illustration .mini-avatar {
+    position: absolute;
+    width: 27px; height: 27px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9.5px; font-weight: 700; color: var(--yellow-ink);
+    box-shadow: var(--shadow-sm);
+    animation: cp-bob 4.5s var(--ease) infinite;
+}
+.auth-illustration .mini-avatar .dot {
+    position: absolute; right: -2px; bottom: -2px;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--muted); border: 1.5px solid var(--white);
+}
+.auth-illustration .mini-avatar .dot.on { background: var(--ok); }
+.auth-illustration .m1 { left: 6%; top: 8%; animation-delay: 0s; }
+.auth-illustration .m2 { left: 80%; top: 12%; animation-delay: 1s; }
+.auth-illustration .m3 { left: 44%; top: 76%; animation-delay: 2s; }
+
+@media (prefers-reduced-motion: reduce) {
+    .auth-illustration .thread, .auth-illustration .mini-avatar { animation: none; }
+}
+
+/* ---------- 6b. Chat preview (landing page hero) ----------
+   A literal small mock of the real product: a mini conversation
+   window with actual message bubbles, a typing indicator, delivery
+   ticks, and a labelled AI Assistant smart-reply — built from the
+   exact .avatar/.status/.bubble/.typing/.ai-label/.chip components
+   the real Messages and AI Assistant pages use, plus two small
+   "someone else is online, a message just landed" flourishes around
+   the card. Meant to read as "this is what the app looks like" within
+   a couple of seconds. Lives on index.html only — the auth pages use
+   the smaller, more abstract .auth-illustration instead, on purpose,
+   so signing in doesn't look like a rerun of the homepage. */
 .chat-preview { position: relative; width: 288px; margin: 10px auto 0; }
 
 .cp-orbit {
@@ -375,15 +414,16 @@ body::before {
 }
 .hero-features .feature-chip i { color: var(--yellow-600); font-size: 12px; }
 
-.auth-panel {
-    position: relative;
-    z-index: 1;
-    display: flex; align-items: center; justify-content: center;
-    padding: 40px 28px;
+.auth-panel { position: relative; z-index: 1; width: 100%; display: flex; justify-content: center; }
+.auth-card {
+    width: 100%; max-width: 408px;
     background: var(--white);
-    border-left: 1px solid var(--stroke);
+    border: 1px solid var(--stroke);
+    border-radius: var(--r-xl);
+    box-shadow: var(--shadow-lg);
+    padding: 36px 34px;
+    animation: rise .5s var(--ease);
 }
-.auth-card { width: 100%; max-width: 400px; animation: rise .5s var(--ease); }
 @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 
 .auth-mark { display: flex; align-items: center; gap: 12px; margin-bottom: 30px; }
@@ -399,8 +439,8 @@ body::before {
 }
 .logo-lg { width: 56px; height: 56px; font-size: 24px; border-radius: 17px; }
 
-/* pulsing ring — signals "this is the AI" wherever it's used (auth hero's
-   network node, the AI Assistant page's own header/empty-state logo) */
+/* pulsing ring — signals "this is the AI" wherever it's used (the AI
+   Assistant page's own header/empty-state logo, the landing hero) */
 .ai-pulse { position: relative; }
 .ai-pulse::after {
     content: "";
@@ -424,10 +464,8 @@ body::before {
 .auth-row-split { display: flex; align-items: center; justify-content: space-between; margin: -6px 0 16px; }
 .auth-row-split .link-btn { font-size: 13px; }
 
-@media (max-width: 900px) {
-    .auth-shell { grid-template-columns: 1fr; }
-    .auth-hero { display: none; }
-    .auth-panel { border-left: 0; padding: 32px 20px; }
+@media (max-width: 480px) {
+    .auth-card { padding: 28px 22px; }
 }
 
 /* ---------- 7. App shell (sidebar nav) ----------
@@ -929,3 +967,30 @@ body::before {
 }
 .chip:hover { background: var(--yellow-100); transform: translateY(-1px); }
 .chip.loading { opacity: .6; }
+
+/* ---------- 18. Feature card text + tech chip — shared by the About
+   page and the landing page's Features/Built-with sections ---------- */
+.feature-title { font-weight: 700; font-size: 14.5px; }
+.feature-desc { font-size: 12.5px; color: var(--muted); line-height: 1.6; }
+
+.tech-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+@media (max-width: 860px) { .tech-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.tech-chip {
+    display: flex; align-items: center; gap: 12px;
+    padding: 15px;
+    background: var(--surface);
+    border: 1px solid var(--stroke);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-sm);
+    animation: rise .4s var(--ease) both;
+    transition: transform .18s var(--ease), box-shadow .18s var(--ease), border-color .18s var(--ease);
+}
+.tech-chip:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: var(--stroke-hi); }
+.tech-chip i { font-size: 19px; color: var(--yellow-700); width: 26px; text-align: center; flex: none; }
+.tech-name { font-weight: 700; font-size: 13.5px; }
+.tech-desc { font-size: 11.5px; color: var(--muted); }

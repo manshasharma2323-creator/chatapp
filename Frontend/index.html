@@ -2,15 +2,160 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>AI Chat Hub</title>
-    <script>
-        (function () {
-            var hasSession = false;
-            try { hasSession = !!(localStorage.getItem("aichathub:token") && localStorage.getItem("aichathub:email")); } catch (e) {}
-            location.replace(hasSession ? "dashboard.html" : "login.html");
-        })();
-    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>AI Chat Hub — Real-time AI-powered messaging</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="assets/theme.css">
+    <link rel="stylesheet" href="assets/landing.css">
 </head>
-<body></body>
+<body>
+
+<div class="aurora" aria-hidden="true"><span class="a1"></span><span class="a2"></span><span class="a3"></span></div>
+
+<!-- ---------- nav ---------- -->
+<header class="landing-nav">
+    <a class="brand" href="index.html">
+        <div class="logo"><i class="fa-solid fa-bolt"></i></div>
+        <span class="brand-name">AI Chat Hub</span>
+    </a>
+
+    <nav class="landing-nav-links">
+        <a href="#home">Home</a>
+        <a href="#features">Features</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+    </nav>
+
+    <div class="landing-nav-spacer"></div>
+
+    <div class="landing-nav-actions">
+        <a class="btn-ghost" href="login.html">Login</a>
+        <a class="btn-primary" href="register.html">Get Started</a>
+        <button class="icon-btn landing-burger" id="landingBurger" aria-label="Menu"><i class="fa-solid fa-bars"></i></button>
+    </div>
+</header>
+<nav class="landing-mobile-nav" id="landingMobileNav">
+    <a href="#home">Home</a>
+    <a href="#features">Features</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+    <a href="login.html">Login</a>
+    <a href="register.html">Get Started</a>
+</nav>
+
+<!-- ---------- hero ---------- -->
+<section class="landing-hero" id="home">
+    <div class="landing-hero-copy">
+        <span class="eyebrow"><i class="fa-solid fa-wand-magic-sparkles"></i> AI-Powered &middot; Real-Time &middot; Secure</span>
+        <h1>Connect. <span class="accent">Communicate.</span> Create.</h1>
+        <p class="lede">Experience real-time conversations with AI. Chat with friends,
+            get smart replies, and stay connected — anytime, anywhere.</p>
+
+        <div class="landing-hero-actions">
+            <a class="btn-primary" href="register.html"><i class="fa-solid fa-arrow-right"></i>&nbsp; Start Chatting</a>
+            <a class="btn-ghost" href="#features">Learn More</a>
+        </div>
+
+        <div class="hero-features">
+            <span class="feature-chip"><i class="fa-solid fa-bolt"></i> Real-time messaging</span>
+            <span class="feature-chip"><i class="fa-solid fa-wand-magic-sparkles"></i> AI smart replies</span>
+            <span class="feature-chip"><i class="fa-solid fa-lock"></i> Secure conversations</span>
+        </div>
+    </div>
+
+    <div class="landing-hero-visual">
+        <div class="chat-preview" aria-hidden="true">
+            <div class="cp-flow-dot"></div>
+
+            <div class="cp-orbit o1">
+                <div class="avatar avatar-sm" style="background:linear-gradient(135deg,#ffd23f,#e0a300)">
+                    <span>AM</span><span class="status on"></span>
+                </div>
+            </div>
+            <div class="cp-orbit o2">
+                <div class="avatar avatar-sm" style="background:linear-gradient(135deg,#f6c100,#b98900)">
+                    <span>SK</span><span class="status"></span>
+                </div>
+            </div>
+
+            <div class="cp-card">
+                <div class="cp-head">
+                    <div class="avatar" style="background:linear-gradient(135deg,#ffe066,#f6c100)">
+                        <span>JD</span><span class="status on"></span>
+                    </div>
+                    <div>
+                        <div class="cp-head-name">Jordan</div>
+                        <div class="cp-head-status">Online</div>
+                    </div>
+                </div>
+
+                <div class="cp-stream">
+                    <div class="bubble them">Hey! How are you? 👋</div>
+                    <div class="bubble me">Let's connect and chat 🚀<span class="stamp"><i class="fa-solid fa-check-double"></i></span></div>
+                    <div class="typing"><i></i><i></i><i></i></div>
+                </div>
+
+                <div class="cp-ai-row">
+                    <span class="ai-label"><i class="fa-solid fa-wand-magic-sparkles spark"></i> AI Assistant &middot; Smart reply</span>
+                    <span class="chip">Sounds good, see you then!</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ---------- features ---------- -->
+<section class="landing-section" id="features">
+    <div class="landing-section-head">
+        <h2>Everything a real-time chat app should be</h2>
+        <p>Built on a secure Spring Boot backend with live WebSocket delivery and a real AI layer — not a mockup.</p>
+    </div>
+    <div class="stat-grid about-feature-grid">
+        <div class="stat-card"><div class="stat-icon"><i class="fa-solid fa-bolt"></i></div><div class="feature-title">Real-time messaging</div><div class="feature-desc">Messages arrive instantly over a persistent WebSocket connection — no polling, no delay.</div></div>
+        <div class="stat-card" style="animation-delay:.04s"><div class="stat-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></div><div class="feature-title">AI smart replies</div><div class="feature-desc">Short, contextual reply suggestions generated by your configured AI provider, grounded in the real conversation.</div></div>
+        <div class="stat-card" style="animation-delay:.08s"><div class="stat-icon"><i class="fa-solid fa-brain"></i></div><div class="feature-title">Conversation memory</div><div class="feature-desc">The AI assistant reads recent history, so its answers stay on-topic across turns.</div></div>
+        <div class="stat-card" style="animation-delay:.12s"><div class="stat-icon"><i class="fa-solid fa-circle-nodes"></i></div><div class="feature-title">Online / offline presence</div><div class="feature-desc">Live presence broadcasts show who's online right now, down to the individual conversation.</div></div>
+        <div class="stat-card" style="animation-delay:.16s"><div class="stat-icon"><i class="fa-solid fa-lock"></i></div><div class="feature-title">Secure authentication</div><div class="feature-desc">Stateless JWT bearer tokens and bcrypt-hashed passwords protect every account and API route.</div></div>
+        <div class="stat-card" style="animation-delay:.2s"><div class="stat-icon"><i class="fa-solid fa-database"></i></div><div class="feature-title">Persistent chat history</div><div class="feature-desc">Every message is stored in MySQL, so conversations survive a reload or a new device.</div></div>
+    </div>
+</section>
+
+<!-- ---------- about ---------- -->
+<section class="landing-section" id="about">
+    <div class="landing-section-head">
+        <h2>An AI-powered, real-time chat platform</h2>
+        <p>AI Chat Hub pairs instant, persistent conversations with a built-in AI layer — smart reply
+            suggestions grounded in your chat history, and a standalone AI assistant — on top of a
+            secure, JWT-authenticated Spring Boot backend with a MySQL-backed message store.</p>
+    </div>
+    <div style="text-align:center">
+        <a class="link-btn" href="about.html">See the full tech stack &amp; feature list →</a>
+    </div>
+</section>
+
+<!-- ---------- contact ---------- -->
+<section class="landing-section landing-contact" id="contact">
+    <div class="landing-contact-card">
+        <h2 style="margin-bottom:10px">Ready to start chatting?</h2>
+        <p style="color:var(--ink-dim);font-size:14.5px;line-height:1.7">
+            Create a free account in seconds, or reach out at
+            <a class="landing-contact-mail" href="mailto:hello@aichathub.example">hello@aichathub.example</a>
+            with questions.
+        </p>
+        <a class="btn-primary" href="register.html"><i class="fa-solid fa-arrow-right"></i>&nbsp; Get Started Free</a>
+    </div>
+</section>
+
+<!-- ---------- footer ---------- -->
+<footer class="landing-footer">
+    <div class="brand"><div class="logo" style="width:30px;height:30px;font-size:13px;border-radius:9px"><i class="fa-solid fa-bolt"></i></div> AI Chat Hub</div>
+    <div>&copy; 2026 AI Chat Hub. Real-time messaging, powered by AI.</div>
+</footer>
+
+<script src="assets/landing.js"></script>
+</body>
 </html>
