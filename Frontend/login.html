@@ -25,33 +25,42 @@
                 suggestions grounded in your chat history, and talk directly to
                 your built-in AI assistant.</p>
 
-            <div class="network-visual" aria-hidden="true">
-                <svg viewBox="0 0 300 300">
-                    <line class="thread t1" x1="150" y1="150" x2="150" y2="21"></line>
-                    <line class="thread t2" x1="150" y1="150" x2="33" y2="237"></line>
-                    <line class="thread t3" x1="150" y1="150" x2="261" y2="204"></line>
-                </svg>
+            <div class="chat-preview" aria-hidden="true">
+                <div class="cp-flow-dot"></div>
 
-                <div class="network-node ai ai-pulse"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
-
-                <div class="network-node user u1">
-                    <div class="avatar" style="background:linear-gradient(135deg,#ffe066,#f6c100)">
-                        <span>JD</span><span class="status on"></span>
-                    </div>
-                </div>
-                <div class="network-node user u2">
-                    <div class="avatar" style="background:linear-gradient(135deg,#ffd23f,#e0a300)">
+                <div class="cp-orbit o1">
+                    <div class="avatar avatar-sm" style="background:linear-gradient(135deg,#ffd23f,#e0a300)">
                         <span>AM</span><span class="status on"></span>
                     </div>
                 </div>
-                <div class="network-node user u3">
-                    <div class="avatar" style="background:linear-gradient(135deg,#f6c100,#b98900)">
+                <div class="cp-orbit o2">
+                    <div class="avatar avatar-sm" style="background:linear-gradient(135deg,#f6c100,#b98900)">
                         <span>SK</span><span class="status"></span>
                     </div>
                 </div>
 
-                <div class="network-bubble b1"><span></span><span></span></div>
-                <div class="network-bubble b2"><span></span><span></span></div>
+                <div class="cp-card">
+                    <div class="cp-head">
+                        <div class="avatar" style="background:linear-gradient(135deg,#ffe066,#f6c100)">
+                            <span>JD</span><span class="status on"></span>
+                        </div>
+                        <div>
+                            <div class="cp-head-name">Jordan</div>
+                            <div class="cp-head-status">Online</div>
+                        </div>
+                    </div>
+
+                    <div class="cp-stream">
+                        <div class="bubble them">Hey! How are you? 👋</div>
+                        <div class="bubble me">Let's connect and chat 🚀<span class="stamp"><i class="fa-solid fa-check-double"></i></span></div>
+                        <div class="typing"><i></i><i></i><i></i></div>
+                    </div>
+
+                    <div class="cp-ai-row">
+                        <span class="ai-label"><i class="fa-solid fa-wand-magic-sparkles spark"></i> AI Assistant &middot; Smart reply</span>
+                        <span class="chip">Sounds good, see you then!</span>
+                    </div>
+                </div>
             </div>
 
             <div class="hero-features">
