@@ -103,6 +103,15 @@
                 handleIncomingTyping(t.senderEmail.toLowerCase(), !!t.typing);
             });
 
+            // Server rejected something we sent (e.g. chat.send with no
+            // receiver, or to someone who doesn't exist) — surface it
+            // instead of letting it vanish into a STOMP ERROR frame.
+            state.client.subscribe("/user/queue/errors", (frame) => {
+                A.toast(frame.body || "That message couldn't be sent", "bad");
+            });
+
+            syncConversationsFromServer();
+
             A.authFetch("/api/chat/online")
                 .then((r) => (r.ok ? r.json() : []))
                 .then((list) => {
@@ -262,6 +271,39 @@
                 }
             }
         } catch (err) {}
+    }
+
+    /**
+     * Seeds state.chats from the server's conversation list so a fresh
+     * browser/device shows prior conversations immediately, instead of
+     * depending entirely on this device's local cache. A peer already
+     * cached locally (from a previously opened chat) is left as-is — that
+     * cache already has full history, this only fills in what's missing.
+     */
+    function syncConversationsFromServer() {
+        A.authFetch("/api/chat/conversations")
+            .then((r) => (r.ok ? r.json() : []))
+            .then((list) => {
+                let changed = false;
+                (list || []).forEach((c) => {
+                    const peer = (c.peerEmail || "").toLowerCase();
+                    if (!peer) return;
+                    const chat = ensureChat(peer);
+                    if (!chat.messages.length && c.lastMessage) {
+                        chat.messages.push({ mine: !!c.lastMessageMine, content: c.lastMessage, sentAt: c.lastMessageAt });
+                        changed = true;
+                    }
+                    if (typeof c.unreadCount === "number" && state.active !== peer && chat.unread !== c.unreadCount) {
+                        chat.unread = c.unreadCount;
+                        changed = true;
+                    }
+                });
+                if (changed) {
+                    persistChats();
+                    renderChatList();
+                }
+            })
+            .catch(() => {});
     }
 
     function markReadOnServer(peerEmail) {

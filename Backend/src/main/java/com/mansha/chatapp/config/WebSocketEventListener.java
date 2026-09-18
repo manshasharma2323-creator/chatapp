@@ -24,9 +24,11 @@ public class WebSocketEventListener {
 
     @EventListener
     public void handleConnect(SessionConnectedEvent event) {
+        StompHeaderAccessor accessor =
+                StompHeaderAccessor.wrap(event.getMessage());
         Principal principal = event.getUser();
         if (principal != null && principal.getName() != null) {
-            presenceService.userConnected(principal.getName());
+            presenceService.userConnected(principal.getName(), accessor.getSessionId());
         }
     }
 
@@ -36,7 +38,7 @@ public class WebSocketEventListener {
                 StompHeaderAccessor.wrap(event.getMessage());
         Principal principal = accessor.getUser();
         if (principal != null && principal.getName() != null) {
-            presenceService.userDisconnected(principal.getName());
+            presenceService.userDisconnected(principal.getName(), accessor.getSessionId());
         }
     }
 }

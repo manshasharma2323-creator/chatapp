@@ -8,35 +8,53 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Tracks who's online by WebSocket session, not just by email — a user can
+ * have several sessions open at once (multiple tabs/devices, or a brief
+ * reconnect), so a single disconnect must only mark them offline once their
+ * LAST session is gone, not the first.
+ */
 @Service
 public class PresenceService {
 
     private final SimpMessagingTemplate messagingTemplate;
 
-    // Thread-safe set of currently connected user emails
-    private final Set<String> onlineUsers =
-            Collections.newSetFromMap(new ConcurrentHashMap<>());
+    // email -> set of open WebSocket session ids for that user
+    private final ConcurrentHashMap<String, Set<String>> sessionsByUser = new ConcurrentHashMap<>();
 
     public PresenceService(SimpMessagingTemplate messagingTemplate) {
         this.messagingTemplate = messagingTemplate;
     }
 
-    public void userConnected(String email) {
-        onlineUsers.add(email);
-        broadcast(email, true);
+    public void userConnected(String email, String sessionId) {
+        Set<String> sessions = sessionsByUser.computeIfAbsent(
+                email, e -> Collections.newSetFromMap(new ConcurrentHashMap<>())
+        );
+        boolean wasOffline = sessions.isEmpty();
+        sessions.add(sessionId);
+        if (wasOffline) {
+            broadcast(email, true);
+        }
     }
 
-    public void userDisconnected(String email) {
-        onlineUsers.remove(email);
-        broadcast(email, false);
+    public void userDisconnected(String email, String sessionId) {
+        Set<String> sessions = sessionsByUser.get(email);
+        if (sessions == null) return;
+
+        sessions.remove(sessionId);
+        if (sessions.isEmpty()) {
+            sessionsByUser.remove(email, sessions);
+            broadcast(email, false);
+        }
     }
 
     public boolean isOnline(String email) {
-        return onlineUsers.contains(email);
+        Set<String> sessions = sessionsByUser.get(email);
+        return sessions != null && !sessions.isEmpty();
     }
 
     public Set<String> getOnlineUsers() {
-        return Collections.unmodifiableSet(onlineUsers);
+        return Collections.unmodifiableSet(sessionsByUser.keySet());
     }
 
     private void broadcast(String email, boolean online) {

@@ -1,13 +1,16 @@
 package com.mansha.chatapp.service;
 
 import com.mansha.chatapp.dto.ChatMessageDto;
+import com.mansha.chatapp.dto.ConversationSummaryDto;
 import com.mansha.chatapp.entity.ChatMessage;
 import com.mansha.chatapp.repository.ChatMessageRepository;
 import com.mansha.chatapp.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -84,6 +87,35 @@ public class ChatService {
             counts.put((String) row[0], (Long) row[1]);
         }
         return counts;
+    }
+
+    /**
+     * One row per peer the current user has ever exchanged a message with,
+     * newest conversation first — backs the sidebar so it's correct on a
+     * fresh browser/device instead of depending on a local cache.
+     */
+    @Transactional(readOnly = true)
+    public List<ConversationSummaryDto> getConversations(String currentUserEmail) {
+        List<ChatMessage> messages =
+                chatMessageRepository.findBySenderEmailOrReceiverEmailOrderBySentAtDesc(currentUserEmail, currentUserEmail);
+
+        Map<String, Long> unreadCounts = getUnreadCounts(currentUserEmail);
+
+        LinkedHashSet<String> seenPeers = new LinkedHashSet<>();
+        List<ConversationSummaryDto> conversations = new ArrayList<>();
+
+        for (ChatMessage m : messages) {
+            boolean mine = m.getSenderEmail().equalsIgnoreCase(currentUserEmail);
+            String peer = mine ? m.getReceiverEmail() : m.getSenderEmail();
+
+            if (!seenPeers.add(peer)) continue; // already have this peer's most recent message
+
+            conversations.add(new ConversationSummaryDto(
+                    peer, m.getContent(), m.getSentAt(), mine, unreadCounts.getOrDefault(peer, 0L)
+            ));
+        }
+
+        return conversations;
     }
 
     private ChatMessageDto toDto(ChatMessage entity) {

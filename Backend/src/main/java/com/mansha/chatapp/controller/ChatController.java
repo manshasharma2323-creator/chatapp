@@ -1,11 +1,13 @@
 package com.mansha.chatapp.controller;
 
 import com.mansha.chatapp.dto.ChatMessageDto;
+import com.mansha.chatapp.dto.ConversationSummaryDto;
 import com.mansha.chatapp.dto.PresenceDto;
 import com.mansha.chatapp.dto.TypingDto;
 import com.mansha.chatapp.dto.TypingRequest;
 import com.mansha.chatapp.service.ChatService;
 import com.mansha.chatapp.service.PresenceService;
+import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -74,6 +76,35 @@ public class ChatController {
                 "/queue/typing",
                 new TypingDto(senderEmail, request.isTyping())
         );
+    }
+
+    /**
+     * Bad chat.send/chat.typing payloads (empty content, unknown receiver,
+     * messaging yourself, etc.) throw IllegalArgumentException. Without this
+     * handler, Spring's STOMP messaging swallows it into a generic ERROR
+     * frame the frontend never sees — this sends it back to the sender's
+     * own error queue instead so the UI can show what went wrong.
+     */
+    @MessageExceptionHandler(IllegalArgumentException.class)
+    public void handleChatError(IllegalArgumentException ex, Principal principal) {
+        if (principal == null) return;
+        messagingTemplate.convertAndSendToUser(
+                principal.getName(),
+                "/queue/errors",
+                ex.getMessage()
+        );
+    }
+
+    /**
+     * GET /api/chat/conversations — every peer the caller has exchanged a
+     * message with, newest first, each with its last message + unread
+     * count. Lets the Messages/Dashboard sidebar be correct on a fresh
+     * device instead of relying only on the browser's local cache.
+     */
+    @GetMapping("/conversations")
+    @ResponseBody
+    public List<ConversationSummaryDto> getConversations(Principal principal) {
+        return chatService.getConversations(principal.getName());
     }
 
     @GetMapping("/history")

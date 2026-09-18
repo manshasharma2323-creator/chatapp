@@ -10,8 +10,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.regex.Pattern;
+
 @Service
 public class UserService {
+
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
 
     @Autowired
     private UserRepository userRepository;
@@ -23,10 +27,22 @@ public class UserService {
     private PasswordEncoder passwordEncoder;
 
     public User registerUser(User user) {
+        if (user.getName() == null || user.getName().isBlank()) {
+            throw new IllegalArgumentException("Name is required.");
+        }
+        if (user.getEmail() == null || !EMAIL_PATTERN.matcher(user.getEmail()).matches()) {
+            throw new IllegalArgumentException("Enter a valid email address.");
+        }
+        if (user.getPassword() == null || user.getPassword().length() < 6) {
+            throw new IllegalArgumentException("Password must be at least 6 characters.");
+        }
+
         userRepository.findByEmail(user.getEmail()).ifPresent(existing -> {
             throw new IllegalArgumentException("An account with this email already exists.");
         });
 
+        user.setName(user.getName().trim());
+        user.setEmail(user.getEmail().trim().toLowerCase());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }

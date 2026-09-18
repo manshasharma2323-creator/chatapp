@@ -60,4 +60,12 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
             GROUP BY m.senderEmail
             """)
     List<Object[]> countUnreadBySender(@Param("currentUser") String currentUser);
+
+    /**
+     * Every message currentUser has sent or received, newest first — the
+     * source for building their conversation list server-side (most
+     * recent message per peer) instead of relying on browser-local cache,
+     * so a fresh device/browser still sees prior conversations.
+     */
+    List<ChatMessage> findBySenderEmailOrReceiverEmailOrderBySentAtDesc(String senderEmail, String receiverEmail);
 }

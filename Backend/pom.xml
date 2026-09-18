@@ -124,6 +124,15 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!-- In-memory DB for tests, so the test suite never touches the real
+		     MySQL database. src/test/resources/application.properties points
+		     the test context at this instead. -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 
 	<!-- Build -->
