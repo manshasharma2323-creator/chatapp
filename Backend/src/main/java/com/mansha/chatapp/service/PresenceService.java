@@ -48,11 +48,6 @@ public class PresenceService {
         }
     }
 
-    public boolean isOnline(String email) {
-        Set<String> sessions = sessionsByUser.get(email);
-        return sessions != null && !sessions.isEmpty();
-    }
-
     public Set<String> getOnlineUsers() {
         return Collections.unmodifiableSet(sessionsByUser.keySet());
     }
