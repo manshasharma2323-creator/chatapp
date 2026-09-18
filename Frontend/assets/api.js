@@ -52,6 +52,17 @@ window.App = (function () {
     }
 
     function signOut() {
+        // Best-effort: revoke this token server-side so it can't be reused
+        // even if someone captured it before logout. Never block the
+        // actual sign-out on this — a slow/unreachable backend shouldn't
+        // trap the user on the page.
+        const token = getToken();
+        if (token) {
+            fetch(API_BASE + "/api/users/logout", {
+                method: "POST",
+                headers: { Authorization: "Bearer " + token }
+            }).catch(() => { /* non-fatal — local session is cleared regardless */ });
+        }
         clearSession();
         location.href = "login.html";
     }

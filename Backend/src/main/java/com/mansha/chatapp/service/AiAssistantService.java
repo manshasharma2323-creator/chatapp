@@ -1,9 +1,9 @@
 package com.mansha.chatapp.service;
 
+import com.mansha.chatapp.config.AiProviderResolver;
 import com.mansha.chatapp.dto.AssistantChatRequest;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,14 +29,14 @@ public class AiAssistantService {
 
     private final ChatClient openAiChatClient;
     private final ChatClient ollamaChatClient;
-
-    @Value("${app.ai.provider:openai}")
-    private String provider;
+    private final AiProviderResolver aiProviderResolver;
 
     public AiAssistantService(@Qualifier("openAiChatClient") ChatClient openAiChatClient,
-                              @Qualifier("ollamaChatClient") ChatClient ollamaChatClient) {
+                              @Qualifier("ollamaChatClient") ChatClient ollamaChatClient,
+                              AiProviderResolver aiProviderResolver) {
         this.openAiChatClient = openAiChatClient;
         this.ollamaChatClient = ollamaChatClient;
+        this.aiProviderResolver = aiProviderResolver;
     }
 
     public String chat(String message, List<AssistantChatRequest.AssistantTurn> history) {
@@ -65,7 +65,7 @@ public class AiAssistantService {
     }
 
     private ChatClient activeClient() {
-        return "ollama".equalsIgnoreCase(provider) ? ollamaChatClient : openAiChatClient;
+        return aiProviderResolver.isOllama() ? ollamaChatClient : openAiChatClient;
     }
 
     private String buildPrompt(String message, List<AssistantChatRequest.AssistantTurn> history) {

@@ -219,6 +219,9 @@
         chat.unread = 0;
         persistChats();
         markReadOnServer(key);
+        // Keep the sidebar's "Messages" badge in sync immediately, instead
+        // of only updating it on the next incoming message or page reload.
+        A.setNavBadge("messages", Object.values(state.chats).reduce((a, c) => a + (c.unread || 0), 0));
 
         els.peerName.textContent = A.displayName(key);
         els.peerName.title = key;

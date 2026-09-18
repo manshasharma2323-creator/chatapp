@@ -2,7 +2,6 @@ package com.mansha.chatapp.config;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
@@ -19,17 +18,17 @@ import java.util.concurrent.CompletableFuture;
 public class AiWarmupRunner implements ApplicationRunner {
 
     private final ChatClient ollamaChatClient;
+    private final AiProviderResolver aiProviderResolver;
 
-    @Value("${app.ai.provider:openai}")
-    private String provider;
-
-    public AiWarmupRunner(@Qualifier("ollamaChatClient") ChatClient ollamaChatClient) {
+    public AiWarmupRunner(@Qualifier("ollamaChatClient") ChatClient ollamaChatClient,
+                           AiProviderResolver aiProviderResolver) {
         this.ollamaChatClient = ollamaChatClient;
+        this.aiProviderResolver = aiProviderResolver;
     }
 
     @Override
     public void run(ApplicationArguments args) {
-        if (!"ollama".equalsIgnoreCase(provider)) return;
+        if (!aiProviderResolver.isOllama()) return;
 
         CompletableFuture.runAsync(() -> {
             try {

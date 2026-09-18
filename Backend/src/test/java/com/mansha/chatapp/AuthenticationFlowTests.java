@@ -119,6 +119,29 @@ class AuthenticationFlowTests {
     }
 
     @Test
+    void logoutRevokesTokenImmediately() {
+        String email = uniqueEmail();
+        rest.postForEntity(baseUrl("/api/users/register"), registerBody("Test", email, "password123"), Map.class);
+        String token = rest.postForEntity(baseUrl("/api/users/login"),
+                        Map.of("email", email, "password", "password123"), String.class)
+                .getBody().replaceAll("^\"|\"$", "");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+
+        // Works before logout.
+        ResponseEntity<Map> before = rest.exchange(baseUrl("/api/users/me"), HttpMethod.GET, new HttpEntity<>(headers), Map.class);
+        assertThat(before.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        ResponseEntity<Void> logout = rest.exchange(baseUrl("/api/users/logout"), HttpMethod.POST, new HttpEntity<>(headers), Void.class);
+        assertThat(logout.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        // Same token is rejected immediately after logout, well before its 24h expiry.
+        ResponseEntity<Map> after = rest.exchange(baseUrl("/api/users/me"), HttpMethod.GET, new HttpEntity<>(headers), Map.class);
+        assertThat(after.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
     void aiAssistantEndpointRequiresAuthAndRejectsBlankMessage() {
         ResponseEntity<Map> unauthenticated = rest.postForEntity(
                 baseUrl("/api/ai/assistant"), Map.of("message", "hi"), Map.class);

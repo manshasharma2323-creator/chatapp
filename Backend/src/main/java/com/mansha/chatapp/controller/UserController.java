@@ -3,6 +3,7 @@ package com.mansha.chatapp.controller;
 import com.mansha.chatapp.dto.UpdateProfileRequest;
 import com.mansha.chatapp.dto.UserSummaryDto;
 import com.mansha.chatapp.entity.User;
+import com.mansha.chatapp.security.JwtService;
 import com.mansha.chatapp.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +16,9 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private JwtService jwtService;
 
     // Register
     @PostMapping("/register")
@@ -31,10 +35,17 @@ public class UserController {
         );
     }
 
-    // Protected Profile API
-    @GetMapping("/profile")
-    public String profile() {
-        return "Welcome! You are authenticated.";
+    /**
+     * POST /api/users/logout — revokes the caller's own JWT so it stops
+     * working immediately instead of staying valid until its natural
+     * expiry. A JWT is otherwise stateless, so this is what actually makes
+     * "logout" mean something server-side, not just a client-side redirect.
+     */
+    @PostMapping("/logout")
+    public void logout(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            jwtService.revokeToken(authHeader.substring(7));
+        }
     }
 
     /**

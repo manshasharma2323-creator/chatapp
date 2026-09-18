@@ -1,10 +1,10 @@
 package com.mansha.chatapp.service;
 
+import com.mansha.chatapp.config.AiProviderResolver;
 import com.mansha.chatapp.entity.ChatMessage;
 import com.mansha.chatapp.repository.ChatMessageRepository;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -28,16 +28,16 @@ public class SmartReplyService {
     private final ChatClient openAiChatClient;
     private final ChatClient ollamaChatClient;
     private final ChatMessageRepository chatMessageRepository;
-
-    @Value("${app.ai.provider:openai}")
-    private String provider;
+    private final AiProviderResolver aiProviderResolver;
 
     public SmartReplyService(@Qualifier("openAiChatClient") ChatClient openAiChatClient,
                              @Qualifier("ollamaChatClient") ChatClient ollamaChatClient,
-                             ChatMessageRepository chatMessageRepository) {
+                             ChatMessageRepository chatMessageRepository,
+                             AiProviderResolver aiProviderResolver) {
         this.openAiChatClient = openAiChatClient;
         this.ollamaChatClient = ollamaChatClient;
         this.chatMessageRepository = chatMessageRepository;
+        this.aiProviderResolver = aiProviderResolver;
     }
 
     /**
@@ -99,7 +99,7 @@ public class SmartReplyService {
     }
 
     private ChatClient activeClient() {
-        return "ollama".equalsIgnoreCase(provider) ? ollamaChatClient : openAiChatClient;
+        return aiProviderResolver.isOllama() ? ollamaChatClient : openAiChatClient;
     }
 
     private String buildTranscript(List<ChatMessage> messages, String currentUser) {
