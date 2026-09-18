@@ -3,8 +3,11 @@ package com.mansha.chatapp.service;
 import com.mansha.chatapp.config.AiProviderResolver;
 import com.mansha.chatapp.entity.ChatMessage;
 import com.mansha.chatapp.repository.ChatMessageRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -18,12 +21,17 @@ import java.util.stream.Collectors;
 @Service
 public class SmartReplyService {
 
+    private static final Logger log = LoggerFactory.getLogger(SmartReplyService.class);
+
     private static final int HISTORY_LIMIT = 10;
 
     // Ollama unloads its model when idle, so a cold call can take 20-30s to
-    // reload it. Bound the wait so the chat UI never hangs indefinitely —
-    // past this, fall back to the static suggestions below.
-    private static final long AI_TIMEOUT_SECONDS = 12;
+    // reload it — and on CPU-only hardware, even a warm model can take well
+    // over 12s for a full prompt. Bound the wait so the chat UI never hangs
+    // indefinitely — past this, fall back to the static suggestions below.
+    // Configurable since the right value depends on the AI provider/hardware.
+    @Value("${app.ai.smart-reply-timeout-seconds:12}")
+    private long aiTimeoutSeconds;
 
     private final ChatClient openAiChatClient;
     private final ChatClient ollamaChatClient;
@@ -83,16 +91,19 @@ public class SmartReplyService {
                             .user(userPrompt)
                             .call()
                             .content())
-                    .get(AI_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                    .get(aiTimeoutSeconds, TimeUnit.SECONDS);
 
             List<String> suggestions = parseSuggestions(raw);
             if (!suggestions.isEmpty()) {
                 return suggestions;
             }
+            log.warn("AI provider returned no usable suggestions (raw response was blank or unparseable); falling back to static suggestions. Raw: {}", raw);
         } catch (Exception e) {
             // AI provider unreachable, no key, model not pulled, etc.
             // Fall through to the static fallback below so the chat UI
-            // never breaks because of the AI layer.
+            // never breaks because of the AI layer — but log it so a
+            // silent AI outage in production is actually diagnosable.
+            log.warn("Smart Reply AI call failed, falling back to static suggestions: {}", e.toString());
         }
 
         return List.of("Sounds good", "Tell me more", "Got it, thanks");

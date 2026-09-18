@@ -118,13 +118,17 @@ them for production, or to override a default.
 
 | Variable | Purpose | Default |
 |----------|---------|---------|
+| `PORT` | Port the backend listens on — most PaaS hosts (Render, Railway, Heroku) inject this at runtime | `8080` |
 | `DB_URL` | JDBC URL for MySQL | `jdbc:mysql://localhost:3306/ai_chat_app` |
 | `DB_USERNAME` | MySQL username | `root` |
 | `DB_PASSWORD` | MySQL password | `root` |
 | `JWT_SECRET` | HMAC signing key for JWTs — **must** be set to a real random secret before deploying | an obviously-insecure placeholder, so you notice if you forgot |
 | `ALLOWED_ORIGINS` | Comma-separated list of origins allowed to call the API / open a WebSocket (CORS) | localhost dev ports + the deployed Vercel frontend |
-| `OPENAI_API_KEY` | OpenAI API key, only needed if `app.ai.provider=openai` | unset |
-| `app.ai.provider` (in `application.properties`) | `openai` or `ollama` | `ollama` |
+| `OPENAI_API_KEY` | OpenAI API key, only needed to use the `openai` provider | unset |
+| `APP_AI_PROVIDER` | Force `openai` or `ollama`; leave unset to auto-pick `openai` when a real `OPENAI_API_KEY` is set, otherwise `ollama` | `auto` |
+| `OLLAMA_BASE_URL` | Where to reach Ollama, if it's not on the same machine as the backend | `http://localhost:11434` |
+| `AI_SMART_REPLY_TIMEOUT_SECONDS` | How long Smart Reply waits for the AI before falling back to static suggestions | `12` |
+| `AI_ASSISTANT_TIMEOUT_SECONDS` | How long the AI Assistant waits before returning an error | `35` |
 
 The frontend has exactly one configuration point:
 **`Frontend/assets/config.js`** sets `window.CHATAPP_API_BASE` — the

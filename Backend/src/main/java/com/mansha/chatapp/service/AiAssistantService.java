@@ -2,8 +2,11 @@ package com.mansha.chatapp.service;
 
 import com.mansha.chatapp.config.AiProviderResolver;
 import com.mansha.chatapp.dto.AssistantChatRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,11 +23,16 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class AiAssistantService {
 
+    private static final Logger log = LoggerFactory.getLogger(AiAssistantService.class);
+
     // Same reasoning as SmartReplyService: Ollama can take a while to reload
     // a cold model (observed up to ~30s), so bound the wait rather than let
     // the request hang — but give it the full realistic window before giving
     // up, since unlike smart-replies this feature has no silent fallback.
-    private static final long AI_TIMEOUT_SECONDS = 35;
+    // Configurable since the right value depends on the AI provider/hardware.
+    @Value("${app.ai.assistant-timeout-seconds:35}")
+    private long aiTimeoutSeconds;
+
     private static final int HISTORY_LIMIT = 12;
 
     private final ChatClient openAiChatClient;
@@ -56,9 +64,10 @@ public class AiAssistantService {
                             .user(prompt)
                             .call()
                             .content())
-                    .get(AI_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                    .get(aiTimeoutSeconds, TimeUnit.SECONDS)
                     .trim();
         } catch (Exception e) {
+            log.warn("AI Assistant call failed: {}", e.toString());
             throw new AiAssistantUnavailableException(
                     "The AI assistant is unavailable right now. Please try again in a moment.", e);
         }
