@@ -1,6 +1,6 @@
 package com.mansha.chatapp.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * One row in the conversation list: the peer plus their most recent
@@ -11,14 +11,14 @@ public class ConversationSummaryDto {
 
     private String peerEmail;
     private String lastMessage;
-    private LocalDateTime lastMessageAt;
+    private Instant lastMessageAt;
     private boolean lastMessageMine;
     private long unreadCount;
 
     public ConversationSummaryDto() {
     }
 
-    public ConversationSummaryDto(String peerEmail, String lastMessage, LocalDateTime lastMessageAt,
+    public ConversationSummaryDto(String peerEmail, String lastMessage, Instant lastMessageAt,
                                    boolean lastMessageMine, long unreadCount) {
         this.peerEmail = peerEmail;
         this.lastMessage = lastMessage;
@@ -43,11 +43,11 @@ public class ConversationSummaryDto {
         this.lastMessage = lastMessage;
     }
 
-    public LocalDateTime getLastMessageAt() {
+    public Instant getLastMessageAt() {
         return lastMessageAt;
     }
 
-    public void setLastMessageAt(LocalDateTime lastMessageAt) {
+    public void setLastMessageAt(Instant lastMessageAt) {
         this.lastMessageAt = lastMessageAt;
     }
 

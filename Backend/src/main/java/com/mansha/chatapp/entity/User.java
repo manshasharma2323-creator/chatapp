@@ -13,6 +13,11 @@ public class User {
 
     private String name;
 
+    // Unique so concurrent registrations can't create duplicate accounts.
+    // Existing databases pick this up via ddl-auto=update (if legacy rows
+    // already contain duplicates MySQL refuses the index and logs a warning
+    // at startup — dedupe those rows manually, see README troubleshooting).
+    @Column(unique = true, length = 150)
     private String email;
 
     private String password;

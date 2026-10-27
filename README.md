@@ -158,10 +158,12 @@ step** — by design, so it deploys as-is to any static host. Every
 authenticated page follows the same pattern:
 
 1. `assets/config.js` — sets `window.CHATAPP_API_BASE` (the one
-   deployment-specific value).
+   deployment-specific value): `http://localhost:8080` automatically on
+   localhost, and `PROD_API_BASE` (edit this) everywhere else.
 2. `assets/api.js` — shared module: session storage (JWT in
    `localStorage`), an authenticated `fetch` wrapper that auto-redirects
-   to login on a 401/403, formatting helpers, toasts, and the shared
+   to login on a 401, "Remember me" session handling (localStorage vs
+   sessionStorage), formatting helpers, toasts, and the shared
    sidebar shell.
 3. `assets/<page>.js` — the page's own logic, e.g. `messages.js` owns the
    WebSocket connection and chat UI; `login.js` owns the login form.
@@ -375,8 +377,9 @@ real values).
 | `DB_URL` | JDBC URL for MySQL | `jdbc:mysql://localhost:3306/ai_chat_app` |
 | `DB_USERNAME` | MySQL username | `root` |
 | `DB_PASSWORD` | MySQL password | `root` |
-| `JWT_SECRET` | HMAC signing key for JWTs — **must** be set to a real random secret before deploying | an obviously-insecure placeholder, so you notice if you forgot |
+| `JWT_SECRET` | HMAC signing key for JWTs — **must** be set to a real random secret before deploying | unset → a random per-process secret (logins reset on every restart; a warning is logged). Must be ≥ 32 chars when set |
 | `ALLOWED_ORIGINS` | Comma-separated list of origins allowed to call the API / open a WebSocket (CORS) | localhost dev ports + the deployed Vercel frontend |
+| `JPA_SHOW_SQL` | Log every SQL statement (debugging only) | `false` |
 | `OPENAI_API_KEY` | OpenAI API key, only needed to use the `openai` provider | unset |
 | `APP_AI_PROVIDER` | Force `openai` or `ollama`; leave unset to auto-pick `openai` when a real `OPENAI_API_KEY` is set, otherwise `ollama` | `auto` |
 | `OLLAMA_BASE_URL` | Where to reach Ollama, if it's not on the same machine as the backend | `http://localhost:11434` |
@@ -384,9 +387,12 @@ real values).
 | `AI_ASSISTANT_TIMEOUT_SECONDS` | How long the AI Assistant waits before returning an error | `35` |
 
 The frontend has exactly one configuration point:
-**`Frontend/assets/config.js`** sets `window.CHATAPP_API_BASE` — the
-backend's base URL. It's loaded before every other script on every
-authenticated page.
+**`Frontend/assets/config.js`** — the backend's base URL. On
+`localhost`/`127.0.0.1` it targets `http://localhost:8080` automatically;
+on any other host it uses `PROD_API_BASE`, which you must set to your
+backend's public **https** URL. While it is empty, a deployed site shows a
+"not connected to a backend" banner and login/register refuse to run (it
+never falls back to the visitor's own `localhost:8080`).
 
 **Never commit real values for any of these.** `Backend/.env.example`
 exists precisely so real secrets never need to touch the repository —
@@ -601,8 +607,9 @@ Set `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`, and
 variables on whatever platform you use — never in a committed file.
 
 **Frontend** — deploy `Frontend/` on Vercel (or any static host):
-1. Edit `Frontend/assets/config.js` and set `window.CHATAPP_API_BASE` to
-   your deployed backend's URL.
+1. Edit `Frontend/assets/config.js` and set `PROD_API_BASE` to your
+   deployed backend's public **https** URL (no trailing slash). The
+   backend must also list this site's origin in `ALLOWED_ORIGINS`.
 2. Push. `vercel.json` at the repo root already tells Vercel this is a
    static site (no build command, `Frontend/` as the output directory) —
    no framework/build configuration needed on Vercel's side.
@@ -613,6 +620,13 @@ variables on whatever platform you use — never in a committed file.
   build; `vercel.json` disables the build step entirely. If you see this
   error, check the Vercel dashboard's Framework Preset is set to *Other*
   and the Build/Install Command overrides are off.
+- **"This deployment isn't connected to a backend yet" banner** — set
+  `PROD_API_BASE` in `Frontend/assets/config.js` and redeploy.
+- **Everyone is logged out after each backend restart** — `JWT_SECRET` is
+  not set, so a random secret is generated per process. Set it.
+- **Startup warning that a unique index on `users.email` failed** — your
+  existing table contains duplicate emails (accounts that differ only by
+  case/whitespace). Merge or delete the duplicates, then restart.
 - **Frontend can't reach the backend / CORS errors in the console** —
   check `Frontend/assets/config.js` points at the right backend URL, and
   that the backend's `ALLOWED_ORIGINS` includes your frontend's exact
@@ -676,7 +690,13 @@ cd Backend
 ./mvnw test
 ```
 
-Tests run against an isolated in-memory H2 database
+Frontend unit tests (Node 18+, no dependencies):
+
+```bash
+npm test        # from the repo root
+```
+
+Backend tests run against an isolated in-memory H2 database
 (`src/test/resources/application.properties`) — they never touch your real
 MySQL data. Coverage includes: the full register → login → authenticated
 request → logout (with real token-revocation verification) flow, JWT
@@ -685,3 +705,8 @@ test (real STOMP connections proving live delivery + persistence + the
 error-reporting path), chat message validation, unread-count tracking, and
 AI-provider auto-detection for both the "key configured" and "no key
 configured" cases.
+
+`ApiRegressionTests` pins the audit fixes: case-insensitive email
+registration/login, 401 (not 403/500) for anonymous or malformed requests,
+400/404 (not 500) for bad JSON or unknown routes, UTC `Z` timestamps,
+message/AI-prompt size limits, and the JWT-secret safeguards.

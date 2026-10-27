@@ -59,6 +59,7 @@
     async function register() {
         const err = validate();
         if (err) { showError(err); return; }
+        if (!A.apiConfigured) { showError("This site isn't connected to a backend yet (see assets/config.js)."); return; }
         hideError();
 
         const name = els.name.value.trim();

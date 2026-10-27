@@ -19,26 +19,50 @@
 window.App = (function () {
     "use strict";
 
-    const API_BASE = window.CHATAPP_API_BASE || "http://localhost:8080";
+    // config.js decides the backend URL (localhost for local dev, PROD_API_BASE
+    // otherwise). No silent localhost fallback here: on a deployed site that
+    // would send every visitor's requests to their own machine.
+    const API_BASE = String(window.CHATAPP_API_BASE || "").replace(/\/+$/, "");
+    const apiConfigured = API_BASE !== "";
 
-    /* ---------- session ---------- */
+    if (!apiConfigured) {
+        document.addEventListener("DOMContentLoaded", () => {
+            const bar = document.createElement("div");
+            bar.setAttribute("role", "alert");
+            bar.style.cssText = "position:fixed;top:0;left:0;right:0;z-index:9999;padding:10px 16px;" +
+                "background:#7a1f1f;color:#fff;font:600 14px/1.4 system-ui,sans-serif;text-align:center";
+            bar.textContent = "This deployment isn't connected to a backend yet. " +
+                "Set PROD_API_BASE in assets/config.js to your backend's HTTPS URL.";
+            document.body.appendChild(bar);
+        });
+    }
+
+    /* ---------- session ----------
+       "Remember me" keeps the session in localStorage (survives closing the
+       browser); otherwise it lives in sessionStorage and ends with the tab. */
     const SK = { token: "aichathub:token", email: "aichathub:email" };
 
-    function getToken() { try { return localStorage.getItem(SK.token); } catch (e) { return null; } }
-    function getEmail() { try { return localStorage.getItem(SK.email); } catch (e) { return null; } }
+    function readSession(key) {
+        try { return localStorage.getItem(key) || sessionStorage.getItem(key); } catch (e) { return null; }
+    }
 
-    function saveSession(token, email) {
+    function getToken() { return readSession(SK.token); }
+    function getEmail() { return readSession(SK.email); }
+
+    function saveSession(token, email, remember) {
+        clearSession();
         try {
-            localStorage.setItem(SK.token, token);
-            localStorage.setItem(SK.email, email.toLowerCase());
+            const store = remember === false ? sessionStorage : localStorage;
+            store.setItem(SK.token, token);
+            store.setItem(SK.email, email.trim().toLowerCase());
         } catch (e) { /* ignore */ }
     }
 
     function clearSession() {
-        try {
-            localStorage.removeItem(SK.token);
-            localStorage.removeItem(SK.email);
-        } catch (e) { /* ignore */ }
+        [SK.token, SK.email].forEach((key) => {
+            try { localStorage.removeItem(key); } catch (e) { /* ignore */ }
+            try { sessionStorage.removeItem(key); } catch (e) { /* ignore */ }
+        });
     }
 
     /** Redirects to login.html if there's no session; returns {token,email} otherwise. */
@@ -77,8 +101,10 @@ window.App = (function () {
         const headers = Object.assign({}, options.headers || {});
         headers.Authorization = "Bearer " + getToken();
         const res = await fetch(API_BASE + path, Object.assign({}, options, { headers }));
-        if (res.status === 401 || res.status === 403) {
-            // token missing/expired/rejected — bounce to sign-in
+        if (res.status === 401) {
+            // token missing/expired/revoked — bounce to sign-in. (Only 401:
+            // the backend answers anonymous requests with 401; a 403 means
+            // "signed in but not allowed" and must not wipe a valid session.)
             clearSession();
             location.href = "login.html";
             throw new Error("unauthenticated");
@@ -405,7 +431,7 @@ window.App = (function () {
     }
 
     return {
-        API_BASE,
+        API_BASE, apiConfigured,
         getToken, getEmail, saveSession, clearSession, requireSession, signOut,
         authFetch, authHeaders,
         esc, initials, displayName, ramp, clockTime, dayKey, dayLabel, relativeTime,

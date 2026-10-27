@@ -1,9 +1,8 @@
 /* ============================================================
    Chat History page — every past conversation, built entirely from
    your existing backend APIs (no new endpoint needed):
-     GET /api/users/contacts       -> everyone you could have chatted with
-     GET /api/chat/history?with=.. -> that conversation's messages
-     GET /api/chat/unread-counts   -> unread badge per conversation
+     GET /api/chat/conversations   -> every peer + latest message + unread count
+     GET /api/users/contacts       -> display names for those peers
    A conversation only appears here once it has at least one message.
    ============================================================ */
 (function () {
@@ -61,38 +60,30 @@
 
     async function load() {
         try {
-            const [contactsRes, unreadRes] = await Promise.all([
+            // One request for every conversation (latest message + unread
+            // count each) instead of fetching the full history of every
+            // registered user, which grew linearly with the user base.
+            const [contactsRes, convRes] = await Promise.all([
                 A.authFetch("/api/users/contacts"),
-                A.authFetch("/api/chat/unread-counts")
+                A.authFetch("/api/chat/conversations")
             ]);
+            if (!convRes.ok) throw new Error("conversations request failed");
 
             const contacts = contactsRes.ok ? await contactsRes.json() : [];
-            const unreadCounts = unreadRes.ok ? await unreadRes.json() : {};
+            const list = await convRes.json();
+            const names = {};
+            (contacts || []).forEach((u) => { names[(u.email || "").toLowerCase()] = u.name; });
 
-            const histories = await Promise.all(
-                (contacts || []).map((u) => {
-                    const email = (u.email || "").toLowerCase();
-                    return A.authFetch("/api/chat/history?with=" + encodeURIComponent(email))
-                        .then((r) => (r.ok ? r.json() : []))
-                        .then((history) => ({ contact: u, email, history: history || [] }))
-                        .catch(() => ({ contact: u, email, history: [] }));
-                })
-            );
-
-            conversations = histories
-                .filter((h) => h.history.length > 0)
-                .map((h) => {
-                    const last = h.history[h.history.length - 1];
-                    const mineLast = (last.senderEmail || "").toLowerCase() === session.email;
-                    return {
-                        email: h.email,
-                        name: h.contact.name || A.displayName(h.email),
-                        preview: (mineLast ? "You: " : "") + last.content,
-                        lastAt: last.sentAt,
-                        unread: unreadCounts[h.email] || unreadCounts[h.contact.email] || 0
-                    };
-                })
-                .sort((a, b) => new Date(b.lastAt) - new Date(a.lastAt));
+            conversations = (list || []).map((c) => {
+                const email = (c.peerEmail || "").toLowerCase();
+                return {
+                    email,
+                    name: names[email] || A.displayName(email),
+                    preview: (c.lastMessageMine ? "You: " : "") + (c.lastMessage || ""),
+                    lastAt: c.lastMessageAt,
+                    unread: c.unreadCount || 0
+                };
+            }).sort((a, b) => new Date(b.lastAt) - new Date(a.lastAt));
 
             render();
         } catch (err) {

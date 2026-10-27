@@ -20,6 +20,8 @@ import java.util.List;
 @RequestMapping("/api/ai")
 public class AiController {
 
+    private static final int MAX_ASSISTANT_MESSAGE_LENGTH = 4000;
+
     private final SmartReplyService smartReplyService;
     private final AiAssistantService aiAssistantService;
 
@@ -54,6 +56,21 @@ public class AiController {
                                                     Principal principal) {
         if (request.getMessage() == null || request.getMessage().isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "message must not be blank");
+        }
+        // Every call is billed by the AI provider (and ties up a thread for up
+        // to the timeout), so an authenticated user must not be able to send
+        // arbitrarily large prompts.
+        if (request.getMessage().length() > MAX_ASSISTANT_MESSAGE_LENGTH) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "message is too long (max " + MAX_ASSISTANT_MESSAGE_LENGTH + " characters)");
+        }
+        if (request.getHistory() != null) {
+            request.getHistory().forEach(turn -> {
+                if (turn != null && turn.getContent() != null
+                        && turn.getContent().length() > MAX_ASSISTANT_MESSAGE_LENGTH * 2) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "history entry is too long");
+                }
+            });
         }
 
         try {

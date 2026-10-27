@@ -45,6 +45,7 @@
         active: null,
         chats: A.loadChats(session.email),
         onlineUsers: new Set(),
+        knownUsers: null, // Set of registered emails, once /api/users/contacts has loaded
         iAmTypingTo: null,
         stopTypingTimer: null,
         peerTypingFrom: null,
@@ -128,6 +129,12 @@
         state.client.onStompError = (frame) => {
             setConnected(false, "Rejected");
             A.toast(frame.headers.message || "Connection rejected — token invalid", "bad");
+            // A revoked/expired token is rejected on every retry, so the 4s
+            // reconnect loop would spin forever. Any REST call tells us
+            // whether the session is really dead: authFetch clears it and
+            // redirects to sign-in on 401. (A transient server error just
+            // leaves the normal reconnect running.)
+            A.authFetch("/api/users/me").catch(() => {});
         };
         state.client.onWebSocketClose = () => setConnected(false, "Reconnecting…");
 
@@ -256,9 +263,13 @@
             // whole-second precision rather than the raw string.
             const dedupKey = (sentAt, content) => (sentAt || "").slice(0, 19) + "|" + content;
             const known = new Set(chat.messages.map((m) => dedupKey(m.sentAt, m.content)));
+            // "Clear conversation" hides everything up to that moment on this
+            // device; without this the next history fetch brought it all back.
+            const clearedAt = chat.clearedAt ? new Date(chat.clearedAt).getTime() : 0;
 
             let added = 0;
             history.forEach((m) => {
+                if (new Date(m.sentAt).getTime() <= clearedAt) return;
                 const key = dedupKey(m.sentAt, m.content || "");
                 if (!known.has(key)) {
                     chat.messages.push({ mine: (m.senderEmail || "").toLowerCase() === state.myEmail, content: m.content, sentAt: m.sentAt });
@@ -292,7 +303,8 @@
                     const peer = (c.peerEmail || "").toLowerCase();
                     if (!peer) return;
                     const chat = ensureChat(peer);
-                    if (!chat.messages.length && c.lastMessage) {
+                    const clearedAt = chat.clearedAt ? new Date(chat.clearedAt).getTime() : 0;
+                    if (!chat.messages.length && c.lastMessage && new Date(c.lastMessageAt).getTime() > clearedAt) {
                         chat.messages.push({ mine: !!c.lastMessageMine, content: c.lastMessage, sentAt: c.lastMessageAt });
                         changed = true;
                     }
@@ -335,6 +347,9 @@
             const res = await A.authFetch("/api/users/contacts");
             if (!res.ok) throw new Error("failed");
             const list = await res.json();
+            if (Array.isArray(list)) {
+                state.knownUsers = new Set(list.map((u) => (u.email || "").toLowerCase()));
+            }
 
             if (!Array.isArray(list) || !list.length) {
                 els.contactsList.innerHTML = A.emptyState("fa-regular fa-address-book", "No other registered users yet.", "padding:16px");
@@ -597,6 +612,13 @@
         const email = els.newChatEmail.value.trim().toLowerCase();
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { els.newChatError.textContent = "Enter a valid email address."; els.newChatError.hidden = false; return; }
         if (email === state.myEmail) { els.newChatError.textContent = "That's your own address."; els.newChatError.hidden = false; return; }
+        // Don't create a phantom conversation with someone who never registered
+        // (the server would reject every message to them anyway).
+        if (state.knownUsers && !state.knownUsers.has(email)) {
+            els.newChatError.textContent = "No registered user has that email.";
+            els.newChatError.hidden = false;
+            return;
+        }
         ensureChat(email);
         persistChats();
         els.newChatModal.hidden = true;
@@ -606,7 +628,12 @@
 
     els.clearChatBtn.addEventListener("click", () => {
         if (!state.active) return;
-        state.chats[state.active].messages = [];
+        const chat = state.chats[state.active];
+        const last = chat.messages[chat.messages.length - 1];
+        // Server timestamp of the newest message (falls back to now) marks
+        // the cut-off, so later history fetches skip everything before it.
+        chat.clearedAt = last ? last.sentAt : new Date().toISOString();
+        chat.messages = [];
         persistChats();
         renderStream();
         renderChatList();

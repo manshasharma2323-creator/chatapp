@@ -1,6 +1,6 @@
 package com.mansha.chatapp.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 /**
  * The object that travels over the WebSocket between client and server.
@@ -12,13 +12,16 @@ public class ChatMessageDto {
     private String senderEmail;
     private String receiverEmail;
     private String content;
-    private LocalDateTime sentAt;
+    // Instant serializes as ISO-8601 with a trailing "Z". A zone-less
+    // LocalDateTime was parsed by browsers as *their local time*, so every
+    // timestamp was shifted by the viewer's UTC offset.
+    private Instant sentAt;
 
     public ChatMessageDto() {
     }
 
     public ChatMessageDto(String senderEmail, String receiverEmail,
-                          String content, LocalDateTime sentAt) {
+                          String content, Instant sentAt) {
         this.senderEmail = senderEmail;
         this.receiverEmail = receiverEmail;
         this.content = content;
@@ -49,11 +52,11 @@ public class ChatMessageDto {
         this.content = content;
     }
 
-    public LocalDateTime getSentAt() {
+    public Instant getSentAt() {
         return sentAt;
     }
 
-    public void setSentAt(LocalDateTime sentAt) {
+    public void setSentAt(Instant sentAt) {
         this.sentAt = sentAt;
     }
 }

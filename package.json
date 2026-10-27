@@ -1,0 +1,11 @@
+{
+  "name": "ai-chat-hub",
+  "private": true,
+  "description": "Monorepo root. Backend/ is Maven; Frontend/ is static. This file only exists to run the frontend unit tests with Node's built-in test runner (no dependencies).",
+  "scripts": {
+    "test": "node --test tests/frontend/api.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

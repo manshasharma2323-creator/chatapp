@@ -16,7 +16,7 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
             SELECT m FROM ChatMessage m
             WHERE (m.senderEmail = :userA AND m.receiverEmail = :userB)
                OR (m.senderEmail = :userB AND m.receiverEmail = :userA)
-            ORDER BY m.sentAt ASC
+            ORDER BY m.sentAt ASC, m.id ASC
             """)
     List<ChatMessage> findConversation(@Param("userA") String userA,
                                        @Param("userB") String userB);

@@ -15,7 +15,8 @@
         tokenBlock: $("tokenBlock"),
         manualToken: $("manualToken"),
         manualEmail: $("manualEmail"),
-        tokenLoginBtn: $("tokenLoginBtn")
+        tokenLoginBtn: $("tokenLoginBtn"),
+        remember: $("rememberMe")
     };
 
     // Already signed in? Skip straight past the login screen.
@@ -47,6 +48,7 @@
         const password = els.password.value;
 
         if (!email || !password) { showError("Enter your email and password."); return; }
+        if (!A.apiConfigured) { showError("This site isn't connected to a backend yet (see assets/config.js)."); return; }
 
         hideError();
         els.loginBtn.disabled = true;
@@ -74,7 +76,7 @@
                 return;
             }
 
-            A.saveSession(token, email);
+            A.saveSession(token, email, els.remember.checked);
             A.toast("Welcome back, " + A.displayName(email));
             location.href = "dashboard.html";
         } catch (err) {

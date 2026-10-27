@@ -106,7 +106,7 @@ class AuthenticationFlowTests {
     @Test
     void protectedEndpointRejectsMissingToken() {
         ResponseEntity<Map> response = rest.getForEntity(baseUrl("/api/users/me"), Map.class);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test
@@ -115,7 +115,7 @@ class AuthenticationFlowTests {
         headers.set("Authorization", "Bearer not-a-real-token");
         ResponseEntity<Map> response = rest.exchange(
                 baseUrl("/api/users/me"), HttpMethod.GET, new HttpEntity<>(headers), Map.class);
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test
@@ -138,14 +138,14 @@ class AuthenticationFlowTests {
 
         // Same token is rejected immediately after logout, well before its 24h expiry.
         ResponseEntity<Map> after = rest.exchange(baseUrl("/api/users/me"), HttpMethod.GET, new HttpEntity<>(headers), Map.class);
-        assertThat(after.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(after.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test
     void aiAssistantEndpointRequiresAuthAndRejectsBlankMessage() {
         ResponseEntity<Map> unauthenticated = rest.postForEntity(
                 baseUrl("/api/ai/assistant"), Map.of("message", "hi"), Map.class);
-        assertThat(unauthenticated.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(unauthenticated.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
 
         String email = uniqueEmail();
         rest.postForEntity(baseUrl("/api/users/register"), registerBody("Test", email, "password123"), Map.class);

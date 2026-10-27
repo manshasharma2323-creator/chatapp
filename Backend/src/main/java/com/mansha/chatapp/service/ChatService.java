@@ -8,6 +8,9 @@ import com.mansha.chatapp.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -16,6 +19,9 @@ import java.util.Map;
 
 @Service
 public class ChatService {
+
+    /** Upper bound on one message's text; also keeps AI prompts and the DB row sane. */
+    public static final int MAX_MESSAGE_LENGTH = 5000;
 
     private final ChatMessageRepository chatMessageRepository;
     private final UserRepository userRepository;
@@ -39,17 +45,25 @@ public class ChatService {
             throw new IllegalArgumentException("Message content cannot be empty");
         }
 
-        if (senderEmail.equalsIgnoreCase(receiverEmail)) {
+        if (dto.getContent().length() > MAX_MESSAGE_LENGTH) {
+            throw new IllegalArgumentException(
+                    "Message is too long (max " + MAX_MESSAGE_LENGTH + " characters)");
+        }
+
+        if (senderEmail.equalsIgnoreCase(receiverEmail.trim())) {
             throw new IllegalArgumentException("Cannot send a message to yourself");
         }
 
-        if (userRepository.findByEmail(receiverEmail).isEmpty()) {
-            throw new IllegalArgumentException("Receiver not found: " + receiverEmail);
-        }
+        // Store the receiver under the address as registered (not as typed),
+        // so history/unread queries — which match on exact email — find it
+        // regardless of the casing the client sent.
+        String canonicalReceiver = userRepository.findByEmail(receiverEmail.trim().toLowerCase())
+                .orElseThrow(() -> new IllegalArgumentException("Receiver not found: " + receiverEmail))
+                .getEmail();
 
         ChatMessage entity = new ChatMessage(
                 senderEmail,
-                receiverEmail,
+                canonicalReceiver,
                 dto.getContent()
         );
 
@@ -111,11 +125,16 @@ public class ChatService {
             if (!seenPeers.add(peer)) continue; // already have this peer's most recent message
 
             conversations.add(new ConversationSummaryDto(
-                    peer, m.getContent(), m.getSentAt(), mine, unreadCounts.getOrDefault(peer, 0L)
+                    peer, m.getContent(), toInstant(m.getSentAt()), mine, unreadCounts.getOrDefault(peer, 0L)
             ));
         }
 
         return conversations;
+    }
+
+    // sentAt is persisted as UTC wall-clock time (see ChatMessage.onCreate).
+    private static Instant toInstant(LocalDateTime sentAt) {
+        return sentAt == null ? null : sentAt.toInstant(ZoneOffset.UTC);
     }
 
     private ChatMessageDto toDto(ChatMessage entity) {
@@ -123,7 +142,7 @@ public class ChatService {
                 entity.getSenderEmail(),
                 entity.getReceiverEmail(),
                 entity.getContent(),
-                entity.getSentAt()
+                toInstant(entity.getSentAt())
         );
     }
 }

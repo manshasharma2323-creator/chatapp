@@ -90,7 +90,8 @@
 
     A.authFetch("/api/chat/online")
         .then((r) => (r.ok ? r.json() : []))
-        .then((list) => { $("statOnline").textContent = (list || []).length; })
+        // "Online" means *other* people — the list also contains you.
+        .then((list) => { $("statOnline").textContent = (list || []).filter((p) => (p.email || "").toLowerCase() !== email).length; })
         .catch(() => { $("statOnline").textContent = "—"; });
 
     A.authFetch("/api/users/contacts")

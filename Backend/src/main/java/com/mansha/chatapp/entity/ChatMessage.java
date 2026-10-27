@@ -3,6 +3,7 @@ package com.mansha.chatapp.entity;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 @Entity
 @Table(
@@ -49,7 +50,10 @@ public class ChatMessage {
     @PrePersist
     protected void onCreate() {
         if (this.sentAt == null) {
-            this.sentAt = LocalDateTime.now();
+            // Stored as UTC wall-clock so the value means the same thing no
+            // matter what timezone the server/DB happens to run in; the DTO
+            // layer exposes it as an unambiguous UTC instant.
+            this.sentAt = LocalDateTime.now(ZoneOffset.UTC);
         }
     }
 
